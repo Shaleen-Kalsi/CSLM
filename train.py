@@ -19,7 +19,7 @@ from pytorch_lightning.loggers import WandbLogger
 from config import CSLMConfig
 from dataset import CSLMDataset
 from model import LightningModel
-from config import CSLMConfig
+from datautils import *
 
 # set to online to use wandb
 os.environ["WANDB_MODE"] = "offline"
@@ -37,7 +37,10 @@ if __name__ == "__main__":
         project='CSLM'
     )
 
-    # Set up appropriate dataloaders 
+    # Set up appropriate dataloaders
+    # Splitting dataset
+    split_dataset(config.dataset, config.data)
+    
     # Train
     logging.info("Setting up dataloaders..")
     train_set = CSLMDataset(
@@ -112,5 +115,7 @@ if __name__ == "__main__":
 
     logging.info("Training the model..")
     trainer.fit(model, train_dataloaders=train_loader, val_dataloaders=val_loader)
+    logging.info("Saving the model..")
+    torch.save(model.state_dict(), config.model_params)
     logging.info("Testing the model..")
     trainer.test(model, dataloaders=test_loader, verbose=True)
