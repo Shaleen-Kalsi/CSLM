@@ -11,7 +11,7 @@ class CSLMDataset(Dataset):
         self.data = pd.read_csv(CSVPath)
         self.hparams = hparams
         self.tokenizer = AutoTokenizer.from_pretrained(hparams.upstream_model, use_fast=True)
-        self.labels2num = {"positive": 0, "negative": 1}
+        self.labels2num = {"yes": 0, "no": 1}
 
     def __len__(self):
         return len(self.data)
