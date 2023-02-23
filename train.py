@@ -40,7 +40,7 @@ if __name__ == "__main__":
 
     # Set up appropriate dataloaders
     # Splitting dataset
-    split_dataset(config.dataset, config.data)
+    split_dataset(config.dataset, config.data_dir)
     
     # Train
     logging.info("Setting up dataloaders..")

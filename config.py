@@ -36,11 +36,7 @@ class CSLMConfig():
         # LR of optimizer
         self.lr = float(config['hparams']['lr'])
         self.weight_decay = float(config['hparams']['weight_decay'])
-<<<<<<< HEAD
         self.num_classes = config["num_classes"]
-=======
-        self.num_labels = config["num_labels"]
 
         #Maximum sequence length
         self.max_seq_length = config["max_seq_length"]
->>>>>>> ffe98dffc2ac0fac519f1e6278998a359e25d5b9
