@@ -28,7 +28,7 @@ class CSLMConfig():
         self.save_dir = config["hparams"]["save_dir"].replace('$proj_dir', self.dir)
 
         # data augmentation technique to use - dynamic/static
-        self.model.mixup_type = config["hparams"]["mixup_type"]
+        self.mixup_type = config["hparams"]["mixup_type"]
 
         #model params saving
         self.model_params = config["model_params"]
