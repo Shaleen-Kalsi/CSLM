@@ -28,6 +28,9 @@ class CSLMConfig():
         # model checkpoint to continue from
         self.model_checkpt = config["hparams"]["model_checkpt"]
 
+        # data augmentation technique to use - dynamic/static
+        self.model.mixup_type = config["hparams"]["mixup_type"]
+
         #model params saving
         self.model_params = config["model_params"]
 
