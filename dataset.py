@@ -11,19 +11,13 @@ class CSLMDataset(Dataset):
         self.data = pd.read_csv(CSVPath)
         self.hparams = hparams
         self.tokenizer = AutoTokenizer.from_pretrained(hparams.upstream_model, use_fast=True)
-<<<<<<< HEAD
         self.labels2num = {"positive": 0, "negative": 1}
 
-=======
-        self.config = hparams
-        
->>>>>>> ffe98dffc2ac0fac519f1e6278998a359e25d5b9
     def __len__(self):
         return len(self.data)
 
     def __getitem__(self, idx):
         sentence = self.data.iloc[idx, 0]
-<<<<<<< HEAD
 
         #convert label to one-hot
         label_num = self.labels2num[self.data.iloc[idx, 1]]
@@ -32,8 +26,3 @@ class CSLMDataset(Dataset):
         print(encoding)
         print(target_label)
         return {"input_ids": encoding['input_ids'].flatten(), "attention_mask": encoding['attention_mask'], "labels": target_label} # flatten to 1D to make it work with BERT forward function
-=======
-        label = self.data.iloc[idx, 1]
-        features = self.tokenizer.encode(sentence, max_length=self.config.max_seq_length, pad_to_max_length=True, truncation=True)
-        return features, label
->>>>>>> ffe98dffc2ac0fac519f1e6278998a359e25d5b9

@@ -20,14 +20,8 @@
         "_comment": "Other models to choose from: 'bert-base-multilingual-cased', 'xlm-roberta-base', 'indic-bert"
     },
     "accelerator": "cpu",
-<<<<<<< HEAD
     "devices": 2,
     "n_workers": 1,
     "num_classes": 2,
-=======
-    "devices": 1,
-    "n_workers": 12,
-    "num_labels": 2,
->>>>>>> ffe98dffc2ac0fac519f1e6278998a359e25d5b9
     "max_seq_length": 128
 }
