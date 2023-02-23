@@ -19,7 +19,7 @@ To create dataset splits for,
 
 To train file, make appropriate changes to config file (Example config file at `config.json`) and run,
 ```
-poetry run python train.py --config <config-json>
+poetry run train --config <config-json>
 ```
 
 

@@ -14,7 +14,7 @@ import numpy as np
 from docopt import docopt
 
 
-def preprocess_df(df: pd.DataFrame, col_name: str) -> pd.DataFrame:
+def preprocess_df(df: pd.DataFrame, col1: str, col2: str) -> pd.DataFrame:
     """
     Function to preprocess sentences : Remove urls, convert to lowercase, remove punctuations.
     Args:
@@ -25,15 +25,19 @@ def preprocess_df(df: pd.DataFrame, col_name: str) -> pd.DataFrame:
     """
     del_rows = []
     for i in range(len(df)):
-        sent = df.loc[i, col_name]
+        sent = df.loc[i, col1]
+        label = df.loc[i, col2]
         # Handle null rows
         if sent is np.nan:
+            del_rows.append(i)
+            continue
+        if label not in ['yes', 'no']:
             del_rows.append(i)
             continue
         sent = sent.lower()
         sent = re.sub(r"\shttps://.*\s", "", sent)
         sent = re.sub(r'[^\w\s]', '', sent).strip()
-        df.loc[i, col_name] = sent
+        df.loc[i, col1] = sent
 
     # Delete empty rows
     df = df.drop(index=del_rows)
@@ -47,7 +51,7 @@ def split_dataset(csv_path, out_dir):
         out_dir: Path to dir to save the splits
     """
     dataset = pd.read_csv(csv_path, sep='\t')
-    dataset = preprocess_df(dataset, 'sentence')
+    dataset = preprocess_df(dataset, 'sentence', 'label')
     #80, 10, 10 split
     train, validate, test = np.split(dataset.sample(frac=1, random_state=42), [int(.6*len(dataset)), int(.8*len(dataset))])
 

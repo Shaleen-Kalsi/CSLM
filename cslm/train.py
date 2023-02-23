@@ -7,8 +7,6 @@ Options:
     --config=<config-file>   Path to config file containing hyperparameter info
 """
 import os
-import json
-import torch
 import logging
 from docopt import docopt
 import torch.utils.data as data
@@ -20,13 +18,13 @@ from pytorch_lightning.loggers import WandbLogger
 from cslm.config import CSLMConfig
 from cslm.dataset import CSLMDataset
 from cslm.model import LightningModel
-from datautils import *
+
 
 # set to online to use wandb
 os.environ["WANDB_MODE"] = "offline"
 logging.basicConfig(level=logging.INFO)
 
-if __name__ == "__main__":
+def main():
     args = docopt(__doc__)
     config = CSLMConfig(args["--config"])
 
@@ -37,10 +35,6 @@ if __name__ == "__main__":
         name=config.run_name,
         project='CSLM'
     )
-
-    # Set up appropriate dataloaders
-    # Splitting dataset
-    split_dataset(config.dataset, config.data_dir)
     
     # Train
     logging.info("Setting up dataloaders..")
@@ -84,39 +78,39 @@ if __name__ == "__main__":
     model = LightningModel(config, config.num_classes)
 
     model_checkpoint_callback = ModelCheckpoint(
-        dirpath='checkpoints',
-        monitor='val/loss', 
-        mode='min',
-        verbose=1)
+        dirpath=config.save_dir,
+        monitor='val_loss', 
+        mode='min', # min for loss and max for accuracy
+        verbose=1,
+        filename=config.run_name + "-epoch={epoch}.ckpt")
 
     early_stopping = EarlyStopping(
-                monitor='val/loss',
+                monitor='val_loss',
                 min_delta=0.00,
                 patience=10,
                 verbose=True,
                 mode='min'
                 )
 
-    lr_monitor = LearningRateMonitor(logging_interval='step')
+    #lr_monitor = LearningRateMonitor(logging_interval='step')
 
     trainer = Trainer(
         fast_dev_run=False,
         log_every_n_steps=1,
         devices=config.devices, 
-        max_epochs=config.epochs, 
+        max_epochs=config.epochs,
         callbacks=[
             # early_stopping, uncomment if you want to enable early stopping
-            # model_checkpoint_callback,
+            model_checkpoint_callback
             #lr_monitor
         ],
         #logger=logger,
-        resume_from_checkpoint=config.model_checkpt,
+        resume_from_checkpoint=config.load_checkpt,
         accelerator=config.accelerator # If your machine has GPUs, it will use the GPU Accelerator for training
     )
 
     logging.info("Training the model..")
     trainer.fit(model, train_dataloaders=train_loader, val_dataloaders=val_loader)
-    logging.info("Saving the model..")
-    torch.save(model.state_dict(), config.model_params)
+    #logging.info("Saving the model..")
     #logging.info("Testing the model..")
     #trainer.test(model, dataloaders=test_loader, verbose=True)

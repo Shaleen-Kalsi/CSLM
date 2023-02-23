@@ -1,4 +1,3 @@
-import os
 import json
 
 
@@ -8,12 +7,11 @@ class CSLMConfig():
         with open(config_path, "r") as jsonfile:
             config = json.load(jsonfile)
 
-        self.dir = config['dataDir']['dir']
-        self.data_dir = config['dataDir']['data']
-        self.dataset = config['dataDir']['dataset_path'].replace('$dir', self.dir)
-        self.train_path = config['dataDir']['train_path'].replace('$dir', self.dir)
-        self.test_path = config['dataDir']['test_path'].replace('$dir', self.dir)
-        self.val_path = config['dataDir']['val_path'].replace('$dir', self.dir)
+        self.dir = config['proj_dir']
+        self.data_dir = config['data']['dir']
+        self.train_path = config['data']['train_path'].replace('$dir', self.data_dir)
+        self.test_path = config['data']['test_path'].replace('$dir', self.data_dir)
+        self.val_path = config['data']['val_path'].replace('$dir', self.data_dir)
 
         self.batch_size = int(config['hparams']['batch_size'])
         self.epochs = int(config['hparams']['epochs'])
@@ -26,10 +24,11 @@ class CSLMConfig():
         self.n_workers = int(config['n_workers'])
 
         # model checkpoint to continue from
-        self.model_checkpt = config["hparams"]["model_checkpt"]
+        self.load_checkpt = config["hparams"]["load_checkpt"]
+        self.save_dir = config["hparams"]["save_dir"].replace('$proj_dir', self.dir)
 
-        #model params saving
-        self.model_params = config["model_params"]
+        # model params 
+        self.model_params = config['data']["model_params"]
 
         self.run_name = config['run_name']
         
