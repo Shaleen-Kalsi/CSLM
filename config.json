@@ -1,0 +1,27 @@
+{
+    "model_name": "CSLM",
+    "run_name": "BERT-base",
+    "dataDir": {
+        "dir": "/afs/inf.ed.ac.uk/user/s24/s2424283/MLPProject/MLP-main",
+        "data": "$dir/data",
+        "dataset_path": "$dir/data/hate_speech.tsv",
+        "train_path": "$dir/data/train.csv",
+        "test_path": "$dir/data/test.csv",
+        "val_path": "$dir/data/val.csv",
+        "model_params": "$dir/model/model_weights.pth"
+    },
+    "hparams": {
+        "batch_size": "4",
+        "epochs": "1",
+        "lr": "1e-5",
+        "weight_decay" : "0.0",
+        "upstream_model": "bert-base-cased",
+        "model_checkpt": null,
+        "_comment": "Other models to choose from: 'bert-base-multilingual-cased', 'xlm-roberta-base', 'indic-bert"
+    },
+    "accelerator": "cpu",
+    "devices": 2,
+    "n_workers": 1,
+    "num_classes": 2,
+    "max_seq_length": 128
+}
