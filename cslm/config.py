@@ -27,8 +27,16 @@ class CSLMConfig():
         self.load_checkpt = config["hparams"]["load_checkpt"]
         self.save_dir = config["hparams"]["save_dir"].replace('$proj_dir', self.dir)
 
+<<<<<<< HEAD
         # model params 
         self.model_params = config['data']["model_params"]
+=======
+        # data augmentation technique to use - dynamic/static
+        self.model.mixup_type = config["hparams"]["mixup_type"]
+
+        #model params saving
+        self.model_params = config["model_params"]
+>>>>>>> 2c04da80e0f3ad5527b1c1259256bf419ce09412
 
         self.run_name = config['run_name']
         

@@ -15,8 +15,9 @@
         "lr": "1e-5",
         "weight_decay" : "0.0",
         "upstream_model": "bert-base-cased",
-        "load_checkpt": null,
+        "model_checkpt": null,
         "save_dir": "$proj_dir/checkpoints",
+        "mixup_type": "dynamic",
         "_comment": "Other models to choose from: 'bert-base-multilingual-cased', 'xlm-roberta-base', 'indic-bert"
     },
     "accelerator": "cpu",
