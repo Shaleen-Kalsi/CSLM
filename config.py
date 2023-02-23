@@ -31,4 +31,4 @@ class CSLMConfig():
         # LR of optimizer
         self.lr = float(config['hparams']['lr'])
         self.weight_decay = float(config['hparams']['weight_decay'])
-        self.num_labels = config["num_labels"]
+        self.num_classes = config["num_classes"]

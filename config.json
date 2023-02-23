@@ -18,7 +18,7 @@
     },
     "accelerator": "cpu",
     "devices": 2,
-    "n_workers": 12,
-    "num_labels": 2,
+    "n_workers": 1,
+    "num_classes": 2,
     "max_seq_length": 128
 }

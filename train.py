@@ -77,7 +77,7 @@ if __name__ == "__main__":
     )
 
     logging.info("Setting up the model..")
-    model = LightningModel(config, config.num_labels)
+    model = LightningModel(config, config.num_classes)
 
     model_checkpoint_callback = ModelCheckpoint(
         dirpath='checkpoints',
@@ -112,5 +112,5 @@ if __name__ == "__main__":
 
     logging.info("Training the model..")
     trainer.fit(model, train_dataloaders=train_loader, val_dataloaders=val_loader)
-    logging.info("Testing the model..")
-    trainer.test(model, dataloaders=test_loader, verbose=True)
+    #logging.info("Testing the model..")
+    #trainer.test(model, dataloaders=test_loader, verbose=True)

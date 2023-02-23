@@ -15,32 +15,49 @@ class LightningModel(LightningModule):
         self.save_hyperparameters()
         self.auto_config = AutoConfig.from_pretrained(self.config.upstream_model, num_labels=num_labels)
         self.model = AutoModelForSequenceClassification.from_pretrained(self.config.upstream_model, config=self.auto_config)
+        self.loss_fn = torch.nn.CrossEntropyLoss()
+        # freeze the all weights except the classifier weights at the end
+        for name, param in self.model.named_parameters():
+            if 'classifier' not in name: # classifier layer
+                param.requires_grad = False
 
-    def forward(self, **inputs):
-        return self.model(**inputs) 
+    def forward(self, input_ids, attention_mask, labels):
+        return self.model(input_ids=input_ids, attention_mask=attention_mask) 
 
     def training_step(self, batch, batch_idx):
-        outputs = self(**batch)
-        loss = outputs[0]
-        return loss
+        # batch
+        input_ids = batch['input_ids']
+        labels = batch['labels']
+        attention_mask = batch['attention_mask']
+        #token_type_ids = batch['token_type_ids']
+        # fwd
+        outputs = self(input_ids, attention_mask, labels)
+        logits = outputs[0] # Tuple containing loss[in this case loss is not calculated], logits, hidden states and attentions, since loss is None, only one element in tuple
+        
+        # loss
+        loss = self.loss_fn(logits.view(-1, self.config.num_classes), labels)
+
+        return {'loss': loss} # For backprop
 
     def validation_step(self, batch, batch_idx, dataloader_idx=0):
         outputs = self(**batch)
-        val_loss, logits = outputs[:2]
+        logits = outputs[0]
 
-        if self.config.num_labels > 1:
+        if self.config.num_classes > 1:
             preds = torch.argmax(logits, axis=1)
-        elif self.config.num_labels == 1:
+        elif self.config.num_classes == 1:
             preds = logits.squeeze()
 
         labels = batch["labels"]
 
-        return {"loss": val_loss, "preds": preds, "labels": labels}
+        val_loss = self.loss_fn(logits.view(-1, self.config.num_classes), labels)
+
+        return {"val-loss": val_loss, "preds": preds, "labels": labels}
 
     def validation_epoch_end(self, outputs):
         preds = torch.cat([x["preds"] for x in outputs]).detach().cpu().numpy()
         labels = torch.cat([x["labels"] for x in outputs]).detach().cpu().numpy()
-        loss = torch.stack([x["loss"] for x in outputs]).mean()
+        loss = torch.stack([x["val-loss"] for x in outputs]).mean()
         self.log("val_loss", loss, prog_bar=True)
         #self.log_dict(self.metric.compute(predictions=preds, references=labels), prog_bar=True)
 
