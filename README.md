@@ -2,6 +2,8 @@
 
 ## Setup instructions
 
+> Note: Changing the directory structure of 'cslm' package might break poetry scripts.
+
 Using poetry  
 ```
 pip install poetry

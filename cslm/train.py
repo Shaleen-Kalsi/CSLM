@@ -17,9 +17,9 @@ from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from pytorch_lightning.loggers import WandbLogger
 
-from config import CSLMConfig
-from dataset import CSLMDataset
-from model import LightningModel
+from cslm.config import CSLMConfig
+from cslm.dataset import CSLMDataset
+from cslm.model import LightningModel
 from datautils import *
 
 # set to online to use wandb

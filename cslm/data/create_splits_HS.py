@@ -1,9 +1,17 @@
+"""
+Script to make data splits for the Hate Speech Detection dataset.
+Usage:
+    datasplit_HS --csv=<csv> --out-dir=<dir>
+
+Options:
+    --csv=<csv>    Input CSV file path
+    --out-dir=<dir>    Save directory
+"""
 import os
 import re
 import pandas as pd
 import numpy as np
-from config import CSLMConfig
-from sklearn.model_selection import train_test_split
+from docopt import docopt
 
 
 def preprocess_df(df: pd.DataFrame, col_name: str) -> pd.DataFrame:
@@ -15,11 +23,21 @@ def preprocess_df(df: pd.DataFrame, col_name: str) -> pd.DataFrame:
     Returns:
         Preprocessed Dataframe
     """
+    del_rows = []
     for i in range(len(df)):
         sent = df.loc[i, col_name]
+        # Handle null rows
+        if sent is np.nan:
+            del_rows.append(i)
+            continue
         sent = sent.lower()
-        sent = re.sub(r"\shttps://.*\s", "", sent).strip()
+        sent = re.sub(r"\shttps://.*\s", "", sent)
+        sent = re.sub(r'[^\w\s]', '', sent).strip()
         df.loc[i, col_name] = sent
+
+    # Delete empty rows
+    df = df.drop(index=del_rows)
+    return df
 
 def split_dataset(csv_path, out_dir):
     """
@@ -33,11 +51,16 @@ def split_dataset(csv_path, out_dir):
     #80, 10, 10 split
     train, validate, test = np.split(dataset.sample(frac=1, random_state=42), [int(.6*len(dataset)), int(.8*len(dataset))])
 
-    train_path = os.path.join(out_dir, '/train.csv')
+    train_path = os.path.join(out_dir, "train.csv")
     train.to_csv(train_path, index=False)
 
-    validate_path = os.path.join(out_dir, '/val.csv')
+    validate_path = os.path.join(out_dir, "val.csv")
     validate.to_csv(validate_path, index=False)
 
-    test_path = os.path.join(out_dir, '/test.csv')
+    test_path = os.path.join(out_dir, "test.csv")
     test.to_csv(test_path, index=False)
+
+
+def main():
+    args = docopt(__doc__)
+    split_dataset(args['--csv'], args['--out-dir']) 
