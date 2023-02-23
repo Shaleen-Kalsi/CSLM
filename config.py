@@ -37,6 +37,3 @@ class CSLMConfig():
         self.lr = float(config['hparams']['lr'])
         self.weight_decay = float(config['hparams']['weight_decay'])
         self.num_classes = config["num_classes"]
-
-        #Maximum sequence length
-        self.max_seq_length = config["max_seq_length"]

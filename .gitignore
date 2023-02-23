@@ -1,3 +1,4 @@
 wandb/
 lightning_logs/
 __pycache__/
+notes.md

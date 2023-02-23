@@ -2,15 +2,14 @@
     "model_name": "CSLM",
     "run_name": "BERT-base",
     "dataDir": {
-        "dir": "C:/Users/shale/OneDrive/Documents/CourseBooks/Mlp/MLP-project-repo/MLP",
+        "dir": "/afs/inf.ed.ac.uk/user/s24/s2424283/MLPProject/MLP-main",
         "data": "$dir/data",
         "dataset_path": "$dir/data/hate_speech.tsv",
         "train_path": "$dir/data/train.csv",
         "test_path": "$dir/data/test.csv",
-        "val_path": "$dir/data/val.csv"
+        "val_path": "$dir/data/val.csv",
+        "model_params": "$dir/model/model_weights.pth"
     },
-    
-    "model_params": "$dir/model/model_weights.pth",
     "hparams": {
         "batch_size": "4",
         "epochs": "1",
