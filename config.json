@@ -1,13 +1,12 @@
 {
     "model_name": "CSLM",
-    "proj_dir": "/home/kritianandan/UoE/cslm",
+    "proj_dir": "/C:/Users/shale/OneDrive/Documents/CourseBooks/Mlp/CW4/MLP/cslm",
     "run_name": "BERT-base",
     "data": {
-        "dir": "/home/kritianandan/UoE/cslm/cslm/data",
+        "dir": "C:/Users/shale/OneDrive/Documents/CourseBooks/Mlp/CW4/MLP/cslm/data",
         "train_path": "$dir/train.csv",
         "test_path": "$dir/test.csv",
-        "val_path": "$dir/val.csv",
-        "model_params": "$proj_dir/model/model_weights.pth"
+        "val_path": "$dir/val.csv"
     },
     "hparams": {
         "batch_size": "4",
@@ -20,6 +19,7 @@
         "mixup_type": "dynamic",
         "_comment": "Other models to choose from: 'bert-base-multilingual-cased', 'xlm-roberta-base', 'indic-bert"
     },
+    "model_params": "$proj_dir/model/model_weights.pth",
     "accelerator": "cpu",
     "devices": 1,
     "n_workers": 2,
