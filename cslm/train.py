@@ -79,13 +79,13 @@ def main():
 
     model_checkpoint_callback = ModelCheckpoint(
         dirpath=config.save_dir,
-        monitor='val_loss', 
+        monitor='val/loss', 
         mode='min', # min for loss and max for accuracy
         verbose=1,
         filename=config.run_name + "-epoch={epoch}.ckpt")
 
     early_stopping = EarlyStopping(
-                monitor='val_loss',
+                monitor='val/loss',
                 min_delta=0.00,
                 patience=10,
                 verbose=True,
@@ -104,7 +104,7 @@ def main():
             model_checkpoint_callback
             #lr_monitor
         ],
-        #logger=logger,
+        logger=logger,
         resume_from_checkpoint=config.load_checkpt,
         accelerator=config.accelerator # If your machine has GPUs, it will use the GPU Accelerator for training
     )

@@ -1,4 +1,5 @@
 import torch
+import torchmetrics
 from pytorch_lightning import LightningModule
 from transformers import (
     AutoConfig,
@@ -16,6 +17,7 @@ class LightningModel(LightningModule):
         self.auto_config = AutoConfig.from_pretrained(self.config.upstream_model, num_labels=num_labels)
         self.model = AutoModelForSequenceClassification.from_pretrained(self.config.upstream_model, config=self.auto_config)
         self.loss_fn = torch.nn.CrossEntropyLoss()
+        self.accuracy = torchmetrics.Accuracy(task="multiclass", num_classes=config.num_classes)
         # freeze the all weights except the classifier weights at the end
         for name, param in self.model.named_parameters():
             if 'classifier' not in name: # classifier layer
@@ -33,33 +35,43 @@ class LightningModel(LightningModule):
         # fwd
         outputs = self(input_ids, attention_mask, labels)
         logits = outputs[0] # Tuple containing loss[in this case loss is not calculated], logits, hidden states and attentions, since loss is None, only one element in tuple
-        
+        preds = logits.view(-1, self.config.num_classes)
+        # accuracy
+        acc = self.accuracy(preds, labels)
         # loss
-        loss = self.loss_fn(logits.view(-1, self.config.num_classes), labels)
+        loss = self.loss_fn(preds, labels)
 
-        return {'loss': loss} # For backprop
+        return {'loss': loss, 'acc': acc} # For backprop
+
+    def training_epoch_end(self, outputs):
+        loss = torch.tensor([x['loss'] for x in outputs]).mean()
+        train_acc = torch.tensor([x['acc'] for x in outputs]).mean()
+
+        self.log('train/loss' , loss, on_step=False, on_epoch=True, prog_bar=True) # on_step = false, on_epoch = true, report average loss over the batch instead of per batch
+        self.log('train/acc', train_acc, on_step=False, on_epoch=True, prog_bar=True)
+
 
     def validation_step(self, batch, batch_idx, dataloader_idx=0):
         outputs = self(**batch)
         logits = outputs[0]
 
-        if self.config.num_classes > 1:
-            preds = torch.argmax(logits, axis=1)
-        elif self.config.num_classes == 1:
-            preds = logits.squeeze()
-
         labels = batch["labels"]
 
-        val_loss = self.loss_fn(logits.view(-1, self.config.num_classes), labels)
+        preds = logits.view(-1, self.config.num_classes)
+        # accuracy
+        acc = self.accuracy(preds, labels)
+        #print(preds)
+        #print(labels)
+        # loss
+        loss = self.loss_fn(preds, labels)
 
-        return {"val-loss": val_loss, "preds": preds, "labels": labels}
+        return {"val_loss": loss, "val_acc": acc}
 
     def validation_epoch_end(self, outputs):
-        preds = torch.cat([x["preds"] for x in outputs]).detach().cpu().numpy()
-        labels = torch.cat([x["labels"] for x in outputs]).detach().cpu().numpy()
-        loss = torch.stack([x["val-loss"] for x in outputs]).mean()
-        self.log("val_loss", loss, prog_bar=True)
-        #self.log_dict(self.metric.compute(predictions=preds, references=labels), prog_bar=True)
+        val_acc = torch.tensor([x['val_acc'] for x in outputs]).mean()
+        loss = torch.tensor([x['val_loss'] for x in outputs]).mean()
+        self.log('val/loss' , loss, on_step=False, on_epoch=True, prog_bar=True)
+        self.log('val/acc',val_acc, on_step=False, on_epoch=True, prog_bar=True)
 
     def configure_optimizers(self):
         """Prepare optimizer and schedule (linear warmup and decay)"""
