@@ -7,6 +7,7 @@ from transformers import (
     get_linear_schedule_with_warmup,
 )
 from torch.optim import AdamW
+import torch.nn.functional as F
 
 class LightningModel(LightningModule):
     def __init__(self, config, num_labels):
@@ -17,7 +18,11 @@ class LightningModel(LightningModule):
         self.auto_config = AutoConfig.from_pretrained(self.config.upstream_model, num_labels=num_labels)
         self.model = AutoModelForSequenceClassification.from_pretrained(self.config.upstream_model, config=self.auto_config)
         self.loss_fn = torch.nn.CrossEntropyLoss()
-        self.accuracy = torchmetrics.Accuracy(task="multiclass", num_classes=config.num_classes)
+        if config.num_classes == 2:
+            task = 'binary'
+        else:
+            task = 'multiclass'
+        self.accuracy = torchmetrics.Accuracy(task=task, num_classes=config.num_classes)
         # freeze the all weights except the classifier weights at the end
         for name, param in self.model.named_parameters():
             if 'classifier' not in name: # classifier layer
@@ -33,12 +38,19 @@ class LightningModel(LightningModule):
         attention_mask = batch['attention_mask']
         #token_type_ids = batch['token_type_ids']
         # fwd
-        outputs = self(input_ids, attention_mask, labels)
-        logits = outputs[0] # Tuple containing loss[in this case loss is not calculated], logits, hidden states and attentions, since loss is None, only one element in tuple
+        outputs = self(input_ids, attention_mask, labels) # outputs are from a linear FC, NOT SOFTMAX
+        # Tuple containing loss[in this case loss is not calculated], logits, hidden states and attentions,
+        # since loss is None, only one element in tuple
+        logits = outputs[0] 
         preds = logits.view(-1, self.config.num_classes)
+        pred_probs = F.softmax(preds, dim=1)
         # accuracy
+        # float tensor of shape (N, C, ..), if preds is a floating point we apply torch.argmax along the C dimension 
+        # to automatically convert probabilities/logits into an int tensor.
         acc = self.accuracy(preds, labels)
         # loss
+        # torch.nn.CrossEntropyLoss() combines nn.LogSoftmax() and nn.NLLLoss() in one single class.
+        # Therefore, you should not use softmax before.
         loss = self.loss_fn(preds, labels)
 
         return {'loss': loss, 'acc': acc} # For backprop
@@ -58,10 +70,9 @@ class LightningModel(LightningModule):
         labels = batch["labels"]
 
         preds = logits.view(-1, self.config.num_classes)
+        pred_probs = F.softmax(preds, dim=1)
         # accuracy
         acc = self.accuracy(preds, labels)
-        #print(preds)
-        #print(labels)
         # loss
         loss = self.loss_fn(preds, labels)
 
