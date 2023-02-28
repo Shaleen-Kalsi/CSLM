@@ -17,6 +17,7 @@ class CSLMConfig():
         self.epochs = int(config['hparams']['epochs'])
         
         self.upstream_model = config['hparams']['upstream_model']
+        self.freeze = config['hparams']['freeze']
 
         # No of GPUs for training and no of workers for datalaoders
         self.accelerator = config['accelerator']
@@ -29,9 +30,6 @@ class CSLMConfig():
 
         # data augmentation technique to use - dynamic/static
         self.mixup_type = config["hparams"]["mixup_type"]
-
-        #model params saving
-        self.model_params = config["model_params"]
 
         self.run_name = config['run_name']
         

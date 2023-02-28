@@ -23,10 +23,12 @@ class LightningModel(LightningModule):
         else:
             task = 'multiclass'
         self.accuracy = torchmetrics.Accuracy(task=task, num_classes=config.num_classes)
-        # freeze the all weights except the classifier weights at the end
-        for name, param in self.model.named_parameters():
-            if 'classifier' not in name: # classifier layer
-                param.requires_grad = False
+
+        if config.freeze == 'true':
+            # freeze the all weights except the classifier weights at the end
+            for name, param in self.model.named_parameters():
+                if 'classifier' not in name: # classifier layer
+                    param.requires_grad = False
 
     def forward(self, input_ids, attention_mask, labels):
         return self.model(input_ids=input_ids, attention_mask=attention_mask) 

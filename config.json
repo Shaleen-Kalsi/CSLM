@@ -9,17 +9,17 @@
         "val_path": "$dir/val.csv"
     },
     "hparams": {
-        "batch_size": "4",
+        "batch_size": "5",
         "epochs": "1",
         "lr": "1e-5",
         "weight_decay" : "0.0",
         "upstream_model": "bert-base-cased",
+        "freeze": "false",
         "model_checkpt": null,
         "save_dir": "$proj_dir/checkpoints",
         "mixup_type": "dynamic",
         "_comment": "Other models to choose from: 'bert-base-multilingual-cased', 'xlm-roberta-base', 'indic-bert"
     },
-    "model_params": "$proj_dir/model/model_weights.pth",
     "accelerator": "cpu",
     "devices": 1,
     "n_workers": 2,
