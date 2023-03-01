@@ -10,10 +10,10 @@
     },
     "hparams": {
         "batch_size": "4",
-        "epochs": "1",
+        "epochs": "10",
         "lr": "1e-5",
         "weight_decay" : "0.0",
-        "upstream_model": "bert-base-cased",
+        "upstream_model": "bert-base-uncased",
         "model_checkpt": null,
         "save_dir": "$proj_dir/checkpoints",
         "mixup_type": "dynamic",
