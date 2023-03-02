@@ -17,6 +17,7 @@ datasets = "^2.9.0"
 scikit-learn = "^1.2.1"
 
 [tool.poetry.scripts]
+reformat = "cslm.data.format_data:main"
 datasplit_HS = "cslm.data.create_splits_HS:main"
 train = "cslm.train:main"
 

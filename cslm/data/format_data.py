@@ -2,7 +2,7 @@
 Script to format datasets into appropriate sentence|label form.
 
 Usage:
-    format_data --csv=<csv> --out-dir=<dir>
+    format_data --csv=<csv> 
 
 Options:
     --csv=<csv>    Input CSV file path
@@ -43,6 +43,8 @@ def sa_to_sentence_label(csv_path):
                 formatted = pd.concat([formatted, pd.DataFrame({"sentence": sentence, "label": label}, index = [count])], axis = 0)
             i+=1    
 
+    #print(formatted.iloc[99, :]) 
+    formatted = formatted.drop(99) #corrupted data, removed 
     out_path = csv_path[:csv_path.rfind(".")] + "_reformatted.csv"
     formatted.to_csv(out_path, index=False)
 
@@ -51,5 +53,5 @@ def main():
     args = docopt(__doc__)
     path = args['--csv']
     data = path[path.rfind("/")+1:path.rfind(".")]
-    if data = "sa_hinglish":
+    if data == "sa_hinglish":
         sa_to_sentence_label(args['--csv']) 
