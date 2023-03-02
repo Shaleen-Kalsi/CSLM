@@ -10,6 +10,12 @@ pip install poetry
 poetry install
 ```
 
+`pip install flair` [breaks](https://github.com/flairNLP/flair/issues/2969) for some python versions. So install it separately.
+```
+poetry run pip install git+https://github.com/flairNLP/flair  
+```
+
+
 ## Usage
 
 ### Dataset splits
