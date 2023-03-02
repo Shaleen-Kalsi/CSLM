@@ -18,6 +18,7 @@ scikit-learn = "^1.2.1"
 tqdm = "^4.64.1"
 
 [tool.poetry.scripts]
+reformat = "cslm.data.format_data:main"
 datasplit_HS = "cslm.data.create_splits_HS:main"
 static_da = "cslm.data.static_data_augmentation:main"
 train = "cslm.train:main"
