@@ -25,12 +25,19 @@ To create dataset splits for,
 1. Hate Speech Detection -
    ``` poetry run datasplit_HS ```
 2. Sentiment Analysis
-
+    ``` poetry run datasplit_SA ```
+    
 ### Training
 To train file, make appropriate changes to config file (Example config file at `config.json`) and run,
 ```
 poetry run train --config <config-json>
 ```
+### Testing
+To test file, it is easiest keep the config file (Example config file at `config.json`) the same as during training and run,
+```
+poetry run test --config <config-json>
+```
+
 
 ### Logging
 
