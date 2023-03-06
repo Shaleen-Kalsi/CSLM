@@ -10,12 +10,12 @@ from torch.optim import AdamW
 import torch.nn.functional as F
 
 class LightningModel(LightningModule):
-    def __init__(self, config, num_labels):
+    def __init__(self, config):
         super().__init__()
 
         self.config = config
         self.save_hyperparameters()
-        self.auto_config = AutoConfig.from_pretrained(self.config.upstream_model, num_labels=num_labels)
+        self.auto_config = AutoConfig.from_pretrained(self.config.upstream_model, num_labels=config.num_classes)
         self.model = AutoModelForSequenceClassification.from_pretrained(self.config.upstream_model, config=self.auto_config)
         self.loss_fn = torch.nn.CrossEntropyLoss()
         if config.num_classes == 2:
@@ -23,14 +23,13 @@ class LightningModel(LightningModule):
         else:
             task = 'multiclass'
         self.accuracy = torchmetrics.Accuracy(task=task, num_classes=config.num_classes)
-
         if config.freeze == 'true':
             # freeze the all weights except the classifier weights at the end
             for name, param in self.model.named_parameters():
                 if 'classifier' not in name: # classifier layer
                     param.requires_grad = False
 
-    def forward(self, input_ids, attention_mask, labels):
+    def forward(self, input_ids, attention_mask):
         return self.model(input_ids=input_ids, attention_mask=attention_mask) 
 
     def training_step(self, batch, batch_idx):
@@ -40,7 +39,7 @@ class LightningModel(LightningModule):
         attention_mask = batch['attention_mask']
         #token_type_ids = batch['token_type_ids']
         # fwd
-        outputs = self(input_ids, attention_mask, labels) # outputs are from a linear FC, NOT SOFTMAX
+        outputs = self(input_ids, attention_mask) # outputs are from a linear FC, NOT SOFTMAX
         # Tuple containing loss[in this case loss is not calculated], logits, hidden states and attentions,
         # since loss is None, only one element in tuple
         logits = outputs[0] 
@@ -66,11 +65,12 @@ class LightningModel(LightningModule):
 
 
     def validation_step(self, batch, batch_idx, dataloader_idx=0):
-        outputs = self(**batch)
-        logits = outputs[0]
+        input_ids = batch['input_ids']
+        attention_mask = batch['attention_mask']
+        outputs = self(input_ids, attention_mask)
 
         labels = batch["labels"]
-
+        logits = outputs[0]
         preds = logits.view(-1, self.config.num_classes)
         pred_probs = F.softmax(preds, dim=1)
         # accuracy
@@ -87,25 +87,27 @@ class LightningModel(LightningModule):
         self.log('val/acc',val_acc, on_step=False, on_epoch=True, prog_bar=True)
 
     def test_step(self, batch, batch_idx, dataloader_idx=0):
-        outputs = self(**batch)
-        logits = outputs[0]
+        input_ids = batch['input_ids']
+        attention_mask = batch['attention_mask']
+        outputs = self(input_ids, attention_mask)
 
         labels = batch["labels"]
+        logits = outputs[0]
 
         preds = logits.view(-1, self.config.num_classes)
         pred_probs = F.softmax(preds, dim=1)
         # accuracy
-        acc = self.accuracy(preds, labels)
+        acc = self.accuracy(preds, torch.argmax(labels, dim=1))
         # loss
         loss = self.loss_fn(preds, labels)
 
-        return {"train_loss": loss, "train_acc": acc}
+        return {"test_loss": loss, "test_acc": acc}
 
     def test_epoch_end(self, outputs):
-        train_acc = torch.tensor([x['train_acc'] for x in outputs]).mean()
-        loss = torch.tensor([x['train_loss'] for x in outputs]).mean()
-        self.log('train/loss' , loss, on_step=False, on_epoch=True, prog_bar=True)
-        self.log('train/acc',train_acc, on_step=False, on_epoch=True, prog_bar=True)
+        train_acc = torch.tensor([x['test_acc'] for x in outputs]).mean()
+        loss = torch.tensor([x['test_loss'] for x in outputs]).mean()
+        self.log('test/loss' , loss, on_step=False, on_epoch=True, prog_bar=True)
+        self.log('test/acc',train_acc, on_step=False, on_epoch=True, prog_bar=True)
 
     def configure_optimizers(self):
         """Prepare optimizer and schedule (linear warmup and decay)"""

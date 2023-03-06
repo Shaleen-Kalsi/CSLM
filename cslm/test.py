@@ -6,21 +6,16 @@ Usage:
 Options:
     --config=<config-file>   Path to config file containing hyperparameter info used in training
 """
-import os
 import logging
 from docopt import docopt
 import torch.utils.data as data
-from pytorch_lightning import Trainer, seed_everything
-from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
-from pytorch_lightning.callbacks.early_stopping import EarlyStopping
-from pytorch_lightning.loggers import WandbLogger
+from sklearn.metrics import classification_report
+from tqdm import tqdm
 
 from cslm.config import CSLMConfig
 from cslm.dataset import CSLMDataset
 from cslm.model import LightningModel
 
-# set to online to use wandb
-os.environ["WANDB_MODE"] = "offline"
 logging.basicConfig(level=logging.INFO)
 
 def main():
@@ -28,30 +23,37 @@ def main():
     args = docopt(__doc__)
     config = CSLMConfig(args["--config"])
 
-    seed_everything(42)
-
-    # set logger
-    logger = WandbLogger(
-        name=config.run_name,
-        project='CSLM'
-    )
-
-    # Test
+    # test data
     test_set = CSLMDataset(
         CSVPath = config.test_path,
         hparams = config,
         is_train=False
     )
-    test_loader = data.DataLoader(
-        test_set, 
-        batch_size=config.batch_size,
-        shuffle=False, 
-        num_workers=config.n_workers,
-    )
 
-    model = LightningModel.load_from_checkpoint(config.save_dir + "/" + config.run_name + "-epoch="+ str(config.epochs - 1) + ".ckpt")
-    trainer = Trainer(
-        logger=logger,
-        accelerator=config.accelerator)
-    logging.info("Testing the model..")
-    trainer.test(model, dataloaders=test_loader, verbose=True)
+    test_df = test_set.data
+    logging.info("Loading model from checkpoint..")
+    model = LightningModel.load_from_checkpoint(config.model_checkpt, config=config)
+    #model.to('cuda')
+    model.eval() # evaluation mode
+    test_df["predictions"] = ""
+    num2labels = dict([(val, key) for key, val in test_set.labels2num.items()])
+
+    logging.info("Getting Predictions..")
+    for i in tqdm(range(len(test_df))):
+        data = test_set[i]
+        input_ids = data["input_ids"].view(1, -1)
+        attention_mask = data["attention_mask"].view(1, -1)
+        outputs = model(input_ids=input_ids, attention_mask=attention_mask)
+        logits = outputs[0] 
+        preds = logits.view(-1, config.num_classes).argmax(dim=1).detach().cpu().numpy().astype(int)[0]
+        test_df.loc[i, 'predictions'] = num2labels[preds]
+    
+    labels = list(test_df['label'])
+    preds = list(test_df['predictions'])
+
+    logging.info("Saving predictions..")
+    test_df.to_csv('test_predictions.csv', index=False)
+
+    print(classification_report(y_true=labels, y_pred=preds, target_names=test_set.labels2num.keys(), zero_division='warn'))
+
+    

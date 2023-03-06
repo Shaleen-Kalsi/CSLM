@@ -78,7 +78,7 @@ def main():
     )
 
     logging.info("Setting up the model..")
-    model = LightningModel(config, config.num_classes)
+    model = LightningModel(config)
 
     model_checkpoint_callback = ModelCheckpoint(
         dirpath=config.save_dir,
@@ -108,12 +108,12 @@ def main():
             #lr_monitor
         ],
         logger=logger,
-        resume_from_checkpoint=config.load_checkpt,
+        resume_from_checkpoint=config.model_checkpt,
         accelerator=config.accelerator # If your machine has GPUs, it will use the GPU Accelerator for training
     )
 
     logging.info("Training the model..")
     trainer.fit(model, train_dataloaders=train_loader, val_dataloaders=val_loader)
-    #logging.info("Saving the model..")
-    #logging.info("Testing the model..")
-    #trainer.test(model, dataloaders=test_loader, verbose=True)
+
+    logging.info("Testing the model..")
+    trainer.test(model, dataloaders=test_loader, verbose=True)

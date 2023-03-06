@@ -25,7 +25,7 @@ class CSLMConfig():
         self.n_workers = int(config['n_workers'])
 
         # model checkpoint to continue from
-        self.load_checkpt = config["hparams"]["model_checkpt"]
+        self.model_checkpt = config["hparams"]["model_checkpt"]
         self.save_dir = config["hparams"]["save_dir"].replace('$proj_dir', self.dir)
 
         # data augmentation technique to use - dynamic/static
