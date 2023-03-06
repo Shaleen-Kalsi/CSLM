@@ -41,5 +41,11 @@ poetry run python -m wandb login
 
 To enable wandb, set `os.environ["WANDB_MODE"] = "online"`
 
+if the online mode fails on the cluster,
+run it in offline mode `os.environ["WANDB_MODE"] = "offline"`, then sync it separately using,
+```
+wandb sync <wandb-run-path>
+```
+
 
 
