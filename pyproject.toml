@@ -22,6 +22,7 @@ datasplit_SA = "cslm.data.create_splits_SA:main"
 datasplit_HS = "cslm.data.create_splits_HS:main"
 static_da = "cslm.data.static_data_augmentation:main"
 train = "cslm.train:main"
+test = "cslm.test:main"
 
 [build-system]
 requires = ["poetry-core"]

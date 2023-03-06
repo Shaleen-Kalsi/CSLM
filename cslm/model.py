@@ -86,6 +86,27 @@ class LightningModel(LightningModule):
         self.log('val/loss' , loss, on_step=False, on_epoch=True, prog_bar=True)
         self.log('val/acc',val_acc, on_step=False, on_epoch=True, prog_bar=True)
 
+    def test_step(self, batch, batch_idx, dataloader_idx=0):
+        outputs = self(**batch)
+        logits = outputs[0]
+
+        labels = batch["labels"]
+
+        preds = logits.view(-1, self.config.num_classes)
+        pred_probs = F.softmax(preds, dim=1)
+        # accuracy
+        acc = self.accuracy(preds, labels)
+        # loss
+        loss = self.loss_fn(preds, labels)
+
+        return {"train_loss": loss, "train_acc": acc}
+
+    def test_epoch_end(self, outputs):
+        train_acc = torch.tensor([x['train_acc'] for x in outputs]).mean()
+        loss = torch.tensor([x['train_loss'] for x in outputs]).mean()
+        self.log('train/loss' , loss, on_step=False, on_epoch=True, prog_bar=True)
+        self.log('train/acc',train_acc, on_step=False, on_epoch=True, prog_bar=True)
+
     def configure_optimizers(self):
         """Prepare optimizer and schedule (linear warmup and decay)"""
         adam_epsilon = 1e-8

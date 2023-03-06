@@ -82,7 +82,7 @@ def main():
         monitor='val/loss', 
         mode='min', # min for loss and max for accuracy
         verbose=1,
-        filename=config.run_name + "-epoch={epoch}.ckpt")
+        filename=config.run_name + "-{epoch}")
 
     early_stopping = EarlyStopping(
                 monitor='val/loss',

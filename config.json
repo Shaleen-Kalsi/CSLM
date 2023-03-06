@@ -1,16 +1,16 @@
 {
     "model_name": "CSLM",
-    "proj_dir": "/C:/Users/shale/OneDrive/Documents/CourseBooks/Mlp/CW4/MLP/cslm",
-    "run_name": "BERT-base",
+    "proj_dir": "/Users/umergupta/Library/Mobile Documents/com~apple~CloudDocs/Documents/UoE/MLP_group_assignment/MLP/cslm",
+    "run_name": "BERT-base-umer",
     "data": {
-        "dir": "C:/Users/shale/OneDrive/Documents/CourseBooks/Mlp/CW4/MLP/cslm/data",
+        "dir": "/Users/umergupta/Library/Mobile Documents/com~apple~CloudDocs/Documents/UoE/MLP_group_assignment/MLP/cslm/data",
         "train_path": "$dir/train.csv",
         "test_path": "$dir/test.csv",
         "val_path": "$dir/val.csv"
     },
     "hparams": {
         "batch_size": "5",
-        "epochs": "1",
+        "epochs": "2",
         "lr": "1e-5",
         "weight_decay" : "0.0",
         "upstream_model": "bert-base-cased",
