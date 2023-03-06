@@ -19,6 +19,9 @@ from cslm.config import CSLMConfig
 from cslm.dataset import CSLMDataset
 from cslm.model import LightningModel
 
+import torch
+print(torch.cuda.is_available())
+
 
 # set to online to use wandb
 os.environ["WANDB_MODE"] = "offline"

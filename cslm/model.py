@@ -49,7 +49,7 @@ class LightningModel(LightningModule):
         # accuracy
         # float tensor of shape (N, C, ..), if preds is a floating point we apply torch.argmax along the C dimension 
         # to automatically convert probabilities/logits into an int tensor.
-        acc = self.accuracy(preds, labels)
+        acc = self.accuracy(preds, torch.argmax(labels, dim=1))
         # loss
         # torch.nn.CrossEntropyLoss() combines nn.LogSoftmax() and nn.NLLLoss() in one single class.
         # Therefore, you should not use softmax before.
@@ -74,7 +74,7 @@ class LightningModel(LightningModule):
         preds = logits.view(-1, self.config.num_classes)
         pred_probs = F.softmax(preds, dim=1)
         # accuracy
-        acc = self.accuracy(preds, labels)
+        acc = self.accuracy(preds, torch.argmax(labels, dim=1))
         # loss
         loss = self.loss_fn(preds, labels)
 

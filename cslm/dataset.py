@@ -8,10 +8,10 @@ Change this to the appropriate dataset
 """
 class CSLMDataset(Dataset):
     def __init__(self, CSVPath, hparams, is_train:True):
-        self.data = pd.read_csv(CSVPath)[:10]
+        self.data = pd.read_csv(CSVPath)[:5] 
         self.hparams = hparams
         self.tokenizer = AutoTokenizer.from_pretrained(hparams.upstream_model, use_fast=True)
-        self.labels2num = {"yes": 0, "no": 1}
+        self.labels2num = {"positive": 0, "negative": 1, "neutral": 2}
 
     def __len__(self):
         return len(self.data)
