@@ -17,7 +17,7 @@ class LightningModel(LightningModule):
 
         self.config = config
         self.save_hyperparameters()
-        self.auto_config = AutoConfig.from_pretrained(self.config.upstream_model, num_labels=num_labels)
+        self.auto_config = AutoConfig.from_pretrained(self.config.upstream_model, num_labels=config.num_classes)
         #self.model = AutoModelForSequenceClassification.from_pretrained(self.config.upstream_model, config=self.auto_config)
         self.model = BertModel.from_pretrained(self.config.upstream_model, config=self.auto_config)
         #print(self.model)
@@ -31,7 +31,7 @@ class LightningModel(LightningModule):
         self.classifier = torch.nn.Sequential(
             torch.nn.Linear(input_dim, 128),
             torch.nn.ReLU(),
-            torch.nn.Linear(128, num_labels)
+            torch.nn.Linear(128, config.num_classes)
         )
         #print(self.classifier)
         self.mixup_type = self.config.mixup_type
@@ -128,8 +128,8 @@ class LightningModel(LightningModule):
         self.log('val/acc',val_acc, on_step=False, on_epoch=True, prog_bar=True)
 
     def test_step(self, batch, batch_idx, dataloader_idx=0):
-        input_ids_x = batch['input_ids']
-        attention_mask_x = batch['attention_mask']
+        input_ids_x = batch['input_ids_x']
+        attention_mask_x = batch['attention_mask_x']
         labels_x = batch['labels_x']
         outputs = self.basic_forward(input_ids_x, attention_mask_x, labels_x)
         logits = self.classifier(outputs[1])
