@@ -15,10 +15,14 @@ pandas = "^1.5.3"
 transformers = "^4.26.1"
 datasets = "^2.9.0"
 scikit-learn = "^1.2.1"
+tqdm = "^4.64.1"
 
 [tool.poetry.scripts]
+datasplit_SA = "cslm.data.create_splits_SA:main"
 datasplit_HS = "cslm.data.create_splits_HS:main"
+static_da = "cslm.data.static_data_augmentation:main"
 train = "cslm.train:main"
+test = "cslm.test:main"
 
 [build-system]
 requires = ["poetry-core"]

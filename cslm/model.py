@@ -1,4 +1,5 @@
 import torch
+import torchmetrics
 from pytorch_lightning import LightningModule
 from transformers import (
     AutoConfig,
@@ -8,9 +9,10 @@ from transformers import (
 )
 from torch.optim import AdamW
 import numpy as np
+import torch.nn.functional as F
 
 class LightningModel(LightningModule):
-    def __init__(self, config, num_labels):
+    def __init__(self, config):
         super().__init__()
 
         self.config = config
@@ -33,10 +35,16 @@ class LightningModel(LightningModule):
         )
         #print(self.classifier)
         self.mixup_type = self.config.mixup_type
-        # freeze the all weights except the classifier weights at the end
-        for name, param in self.model.named_parameters():
-            if 'classifier' not in name: # classifier layer
-                param.requires_grad = False
+        if config.num_classes == 2:
+            task = 'binary'
+        else:
+            task = 'multiclass'
+        self.accuracy = torchmetrics.Accuracy(task=task, num_classes=config.num_classes)
+        if config.freeze == 'true':
+            # freeze the all weights except the classifier weights at the end
+            for name, param in self.model.named_parameters():
+                if 'classifier' not in name: # classifier layer
+                    param.requires_grad = False
         
     def basic_forward(self, input_ids, attention_mask, labels):
         return self.model(input_ids=input_ids, attention_mask=attention_mask)
@@ -73,14 +81,27 @@ class LightningModel(LightningModule):
 
         #token_type_ids = batch['token_type_ids']
         # fwd
-        print("***start fwd***")
         logits = self(input_ids_x, input_ids_mixup_x, attention_mask_x, attention_mask_mixup_x, labels_x, labels_mixup_x, lam)
-        #logits = outputs.last_hidden_state#[0] # Tuple containing loss[in this case loss is not calculated], logits, hidden states and attentions, since loss is None, only one element in tuple
-        
+        preds = logits.view(-1, self.config.num_classes)
+        pred_probs = F.softmax(preds, dim=1)
+        # accuracy
+        # float tensor of shape (N, C, ..), if preds is a floating point we apply torch.argmax along the C dimension 
+        # to automatically convert probabilities/logits into an int tensor.
+        acc = self.accuracy(preds, torch.argmax(labels_x, dim=1))
         # loss
-        loss = self.loss_fn(logits.view(-1, self.config.num_classes), labels_x)
+        # torch.nn.CrossEntropyLoss() combines nn.LogSoftmax() and nn.NLLLoss() in one single class.
+        # Therefore, you should not use softmax before.
+        loss = self.loss_fn(preds, labels_x)
 
-        return {'loss': loss} # For backprop
+        return {'loss': loss, 'acc': acc} # For backprop
+
+    def training_epoch_end(self, outputs):
+        loss = torch.tensor([x['loss'] for x in outputs]).mean()
+        train_acc = torch.tensor([x['acc'] for x in outputs]).mean()
+
+        self.log('train/loss' , loss, on_step=False, on_epoch=True, prog_bar=True) # on_step = false, on_epoch = true, report average loss over the batch instead of per batch
+        self.log('train/acc', train_acc, on_step=False, on_epoch=True, prog_bar=True)
+
 
     def validation_step(self, batch, batch_idx, dataloader_idx=0):
 
@@ -91,26 +112,42 @@ class LightningModel(LightningModule):
         outputs = self.basic_forward(input_ids_x, attention_mask_x, labels_x)
 
         logits = self.classifier(outputs[1])
+        preds = logits.view(-1, self.config.num_classes)
+        pred_probs = F.softmax(preds, dim=1)
+        # accuracy
+        acc = self.accuracy(preds, torch.argmax(labels_x, dim=1))
+        # loss
+        loss = self.loss_fn(preds, labels_x)
 
-        if self.config.num_classes > 1:
-            preds = torch.argmax(logits, axis=1)
-        elif self.config.num_classes == 1:
-            preds = logits.squeeze()
-
-        labels = labels_x
-
-        print("labels shape", labels_x.shape)
-
-        val_loss = self.loss_fn(logits.view(-1, self.config.num_classes), labels)
-
-        return {"val-loss": val_loss, "preds": preds, "labels": labels}
+        return {"val_loss": loss, "val_acc": acc}
 
     def validation_epoch_end(self, outputs):
-        preds = torch.cat([x["preds"] for x in outputs]).detach().cpu().numpy()
-        labels = torch.cat([x["labels"] for x in outputs]).detach().cpu().numpy()
-        loss = torch.stack([x["val-loss"] for x in outputs]).mean()
-        self.log("val_loss", loss, prog_bar=True)
-        #self.log_dict(self.metric.compute(predictions=preds, references=labels), prog_bar=True)
+        val_acc = torch.tensor([x['val_acc'] for x in outputs]).mean()
+        loss = torch.tensor([x['val_loss'] for x in outputs]).mean()
+        self.log('val/loss' , loss, on_step=False, on_epoch=True, prog_bar=True)
+        self.log('val/acc',val_acc, on_step=False, on_epoch=True, prog_bar=True)
+
+    def test_step(self, batch, batch_idx, dataloader_idx=0):
+        input_ids_x = batch['input_ids']
+        attention_mask_x = batch['attention_mask']
+        labels_x = batch['labels_x']
+        outputs = self.basic_forward(input_ids_x, attention_mask_x, labels_x)
+        logits = self.classifier(outputs[1])
+
+        preds = logits.view(-1, self.config.num_classes)
+        pred_probs = F.softmax(preds, dim=1)
+        # accuracy
+        acc = self.accuracy(preds, torch.argmax(labels_x, dim=1))
+        # loss
+        loss = self.loss_fn(preds, labels_x)
+
+        return {"test_loss": loss, "test_acc": acc}
+
+    def test_epoch_end(self, outputs):
+        train_acc = torch.tensor([x['test_acc'] for x in outputs]).mean()
+        loss = torch.tensor([x['test_loss'] for x in outputs]).mean()
+        self.log('test/loss' , loss, on_step=False, on_epoch=True, prog_bar=True)
+        self.log('test/acc',train_acc, on_step=False, on_epoch=True, prog_bar=True)
 
     def configure_optimizers(self):
         """Prepare optimizer and schedule (linear warmup and decay)"""

@@ -1,12 +1,12 @@
 {
     "model_name": "CSLM",
-    "proj_dir": "/C:/Users/shale/OneDrive/Documents/CourseBooks/Mlp/CW4/MLP/cslm",
+    "proj_dir": "/home/kritianandan/UoE/cslm",
     "run_name": "BERT-base",
     "data": {
-        "dir": "C:/Users/shale/OneDrive/Documents/CourseBooks/Mlp/CW4/MLP/cslm/data",
-        "train_path": "$dir/train.csv",
-        "test_path": "$dir/test.csv",
-        "val_path": "$dir/val.csv"
+        "dir": "/home/kritianandan/UoE/cslm/cslm/data",
+        "train_path": "$dir/sa_hinglish_train.csv",
+        "test_path": "$dir/sa_hinglish_test.csv",
+        "val_path": "$dir/sa_hinglish_val.csv"
     },
     "hparams": {
         "batch_size": "4",
@@ -14,15 +14,15 @@
         "lr": "1e-5",
         "weight_decay" : "0.0",
         "upstream_model": "bert-base-uncased",
-        "model_checkpt": null,
+        "freeze": "true",
+        "model_checkpt": "/home/kritianandan/UoE/cslm/checkpoints/BERT-base-epoch=4.ckpt",
         "save_dir": "$proj_dir/checkpoints",
         "mixup_type": "dynamic",
         "_comment": "Other models to choose from: 'bert-base-multilingual-cased', 'xlm-roberta-base', 'indic-bert"
     },
-    "model_params": "$proj_dir/model/model_weights.pth",
     "accelerator": "cpu",
     "devices": 1,
     "n_workers": 2,
-    "num_classes": 2,
+    "num_classes": 3,
     "max_seq_length": 128
 }

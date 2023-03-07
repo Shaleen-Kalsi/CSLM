@@ -19,6 +19,9 @@ from cslm.config import CSLMConfig
 from cslm.dataset import CSLMDataset
 from cslm.model import LightningModel
 
+import torch
+print(torch.cuda.is_available())
+
 
 # set to online to use wandb
 os.environ["WANDB_MODE"] = "offline"
@@ -75,17 +78,17 @@ def main():
     )
 
     logging.info("Setting up the model..")
-    model = LightningModel(config, config.num_classes)
+    model = LightningModel(config)
 
     model_checkpoint_callback = ModelCheckpoint(
         dirpath=config.save_dir,
-        monitor='val_loss', 
+        monitor='val/loss', 
         mode='min', # min for loss and max for accuracy
         verbose=1,
-        filename=config.run_name + "-epoch={epoch}.ckpt")
+        filename=config.run_name + "-{epoch}")
 
     early_stopping = EarlyStopping(
-                monitor='val_loss',
+                monitor='val/loss',
                 min_delta=0.00,
                 patience=10,
                 verbose=True,
@@ -104,13 +107,13 @@ def main():
             model_checkpoint_callback
             #lr_monitor
         ],
-        #logger=logger,
-        resume_from_checkpoint=config.load_checkpt,
+        logger=logger,
+        resume_from_checkpoint=config.model_checkpt,
         accelerator=config.accelerator # If your machine has GPUs, it will use the GPU Accelerator for training
     )
 
     logging.info("Training the model..")
     trainer.fit(model, train_dataloaders=train_loader, val_dataloaders=val_loader)
-    #logging.info("Saving the model..")
-    #logging.info("Testing the model..")
-    #trainer.test(model, dataloaders=test_loader, verbose=True)
+
+    logging.info("Testing the model..")
+    trainer.test(model, dataloaders=test_loader, verbose=True)
