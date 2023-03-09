@@ -16,8 +16,25 @@ class LightningModel(LightningModule):
         self.config = config
         self.save_hyperparameters()
         self.auto_config = AutoConfig.from_pretrained(self.config.upstream_model, num_labels=config.num_classes)
-        self.model = AutoModelForSequenceClassification.from_pretrained(self.config.upstream_model, config=self.auto_config)
+        
+        #self.model = AutoModelForSequenceClassification.from_pretrained(self.config.upstream_model, config=self.auto_config)
+        self.model = BertModel.from_pretrained(self.config.upstream_model, config=self.auto_config)
+        #print(self.model)
+        #print("*******************************************************************************************")
+        #bert_params = list(self.model.named_parameters())
+        #x = self.model(0, 0)[0][-1]
+        #print("x:", x)
+        #print(bert_params[17][1])
         self.loss_fn = torch.nn.CrossEntropyLoss()
+        input_dim = 768
+        self.classifier = torch.nn.Sequential(
+            torch.nn.Linear(input_dim, 128),
+            torch.nn.ReLU(),
+            torch.nn.Linear(128, config.num_classes)
+        )
+        #print(self.classifier)
+        self.mixup_type = self.config.mixup_type
+        
         if config.num_classes == 2:
             task = 'binary'
         else:
@@ -87,12 +104,11 @@ class LightningModel(LightningModule):
         self.log('val/acc',val_acc, on_step=False, on_epoch=True, prog_bar=True)
 
     def test_step(self, batch, batch_idx, dataloader_idx=0):
-        input_ids = batch['input_ids']
-        attention_mask = batch['attention_mask']
-        outputs = self(input_ids, attention_mask)
-
-        labels = batch["labels"]
-        logits = outputs[0]
+        input_ids_x = batch['input_ids_x']
+        attention_mask_x = batch['attention_mask_x']
+        labels_x = batch['labels_x']
+        outputs = self.basic_forward(input_ids_x, attention_mask_x, labels_x)
+        logits = self.classifier(outputs[1])
 
         preds = logits.view(-1, self.config.num_classes)
         pred_probs = F.softmax(preds, dim=1)
