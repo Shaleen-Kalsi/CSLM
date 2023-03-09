@@ -9,11 +9,11 @@
         "val_path": "$dir/sa_hinglish_val.csv"
     },
     "hparams": {
-        "batch_size": "4",
-        "epochs": "10",
+        "batch_size": "5",
+        "epochs": "5",
         "lr": "1e-5",
         "weight_decay" : "0.0",
-        "upstream_model": "bert-base-uncased",
+        "upstream_model": "bert-base-cased",
         "freeze": "true",
         "model_checkpt": null,
         "save_dir": "$proj_dir/checkpoints",
