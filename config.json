@@ -1,20 +1,20 @@
 {
     "model_name": "CSLM",
-    "proj_dir": "/C:/Users/shale/OneDrive/Documents/CourseBooks/Mlp/CW4/MLP/cslm",
-    "run_name": "BERT-base-uncased-dynamic-data-aug",
+    "proj_dir": "/home/s2424283/ml-repo/dynamic-data-aug/MLP",
+    "run_name": "bert-base-multilingual-uncased-dynamic-data-aug-1",
     "data": {
-        "dir": "C:/Users/shale/OneDrive/Documents/CourseBooks/Mlp/CW4/MLP/cslm/data",
+        "dir": "/home/s2424283/ml-repo/dynamic-data-aug/MLP/cslm/data",
         "train_path": "$dir/sa_hinglish_train.csv",
         "test_path": "$dir/sa_hinglish_test.csv",
         "val_path": "$dir/sa_hinglish_val.csv"
     },
     "hparams": {
-        "batch_size": "5",
-        "epochs": "5",
+        "batch_size": "4",
+        "epochs": "10",
         "lr": "1e-5",
         "weight_decay" : "0.0",
-        "upstream_model": "bert-base-cased",
-        "freeze": "true",
+        "upstream_model": "bert-base-multilingual-uncased",
+        "freeze": "false",
         "model_checkpt": null,
         "save_dir": "$proj_dir/checkpoints",
         "mixup_type": "dynamic",
