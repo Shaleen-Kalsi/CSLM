@@ -3,11 +3,16 @@
 ## Setup instructions
 
 > Note: Changing the directory structure of 'cslm' package might break poetry scripts.
-
 Using poetry  
 ```
 pip install poetry
 poetry install
+```
+
+Alternate way to install pytorch + GPU on Google Cloud Platform using pip
+```
+poetry remove torch
+pip install torch>=1.12.0+cu116 torchvision>=0.13.0+cu116 torchaudio>=0.13.0 --extra-index-url https://download.pytorch.org/whl/cu116
 ```
 
 `pip install flair` [breaks](https://github.com/flairNLP/flair/issues/2969) for some python versions. So install it separately.
