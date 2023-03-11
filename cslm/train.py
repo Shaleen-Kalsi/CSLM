@@ -95,7 +95,7 @@ def main():
                 mode='min'
                 )
 
-    #lr_monitor = LearningRateMonitor(logging_interval='step')
+    lr_monitor = LearningRateMonitor(logging_interval='step')
 
     trainer = Trainer(
         fast_dev_run=False,
@@ -103,14 +103,30 @@ def main():
         devices=config.devices, 
         max_epochs=config.epochs,
         callbacks=[
-            # early_stopping, uncomment if you want to enable early stopping
+            early_stopping, #uncomment if you want to enable early stopping
+            # lr_monitor,
             model_checkpoint_callback
-            #lr_monitor
         ],
         logger=logger,
         resume_from_checkpoint=config.model_checkpt,
         accelerator=config.accelerator # If your machine has GPUs, it will use the GPU Accelerator for training
     )
+
+    # Run learning rate finder
+    #lr_finder = trainer.tuner.lr_find(model, train_dataloaders=train_loader, val_dataloaders=val_loader)
+    #
+    ## # Results can be found in
+    #lr_finder.results
+#
+    ## # Plot with
+    #fig = lr_finder.plot(suggest=True)
+    #fig.savefig('auto_lr_find_plot.png')
+#
+    ## # Pick point based on plot, or get suggestion
+    #new_lr = lr_finder.suggestion()
+    #print("new lr = ", new_lr)
+    # # update hparams of the model
+    # model.hparams.lr = new_lr
 
     logging.info("Training the model..")
     trainer.fit(model, train_dataloaders=train_loader, val_dataloaders=val_loader)

@@ -8,6 +8,7 @@ from transformers import (
 )
 from torch.optim import AdamW
 import torch.nn.functional as F
+from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 
 class LightningModel(LightningModule):
     def __init__(self, config):
@@ -127,10 +128,11 @@ class LightningModel(LightningModule):
         ]
         optimizer = AdamW(optimizer_grouped_parameters, lr=self.config.lr, eps=adam_epsilon)
 
-        scheduler = get_linear_schedule_with_warmup(
-            optimizer,
-            num_warmup_steps=warmup_steps,
-            num_training_steps=self.trainer.estimated_stepping_batches,
-        )
-        scheduler = {"scheduler": scheduler, "interval": "step", "frequency": 1}
+        #scheduler = get_linear_schedule_with_warmup(
+        #    optimizer,
+        #    num_warmup_steps=warmup_steps,
+        #    num_training_steps=self.trainer.estimated_stepping_batches,
+        #)
+        scheduler = LinearWarmupCosineAnnealingLR(optimizer, warmup_epochs=5, max_epochs=10)
+        scheduler = {"scheduler": scheduler, "interval": "step"}
         return [optimizer], [scheduler]
