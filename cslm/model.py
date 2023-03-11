@@ -48,8 +48,10 @@ class LightningModel(LightningModule):
                 if 'classifier' not in name: # classifier layer
                     param.requires_grad = False
 
-    def basic_forward(self, input_ids, attention_mask, labels):
-        return self.model(input_ids=input_ids, attention_mask=attention_mask)
+    def basic_forward(self, input_ids, attention_mask):
+        outputs = self.model(input_ids=input_ids, attention_mask=attention_mask)
+        logits = self.classifier(outputs[1])
+        return logits
 
     def mixup_forward(self, input_ids_x, input_ids_mixup_x, attention_mask_x, attention_mask_mixup_x, lam):
         x = self.model(input_ids=input_ids_x, attention_mask=attention_mask_x)[1]
@@ -60,8 +62,13 @@ class LightningModel(LightningModule):
         logits = self.classifier(x)
         return logits
 
-    def forward(self, input_ids_x, input_ids_mixup_x, attention_mask_x, attention_mask_mixup_x, labels_x, labels_mixup_x, lam):
-        return self.mixup_forward(input_ids_x, input_ids_mixup_x, attention_mask_x, attention_mask_mixup_x, lam)
+    def forward(self, input_ids_x, attention_mask_x, labels_x, lam, apply_mixup, input_ids_mixup_x = None, attention_mask_mixup_x = None, labels_mixup_x = None):
+        if apply_mixup is True:
+            return self.mixup_forward(input_ids_x, input_ids_mixup_x, attention_mask_x, attention_mask_mixup_x, lam)
+        else:
+            logits = self.basic_forward(input_ids_x, attention_mask_x)
+            return logits
+
 
     def training_step(self, batch, batch_idx):
         # batch
@@ -83,7 +90,8 @@ class LightningModel(LightningModule):
 
         #token_type_ids = batch['token_type_ids']
         # fwd
-        logits = self(input_ids_x, input_ids_mixup_x, attention_mask_x, attention_mask_mixup_x, labels_x, labels_mixup_x, lam)
+        apply_mixup = True
+        logits = self(input_ids_x, attention_mask_x, labels_x, lam,  apply_mixup, input_ids_mixup_x, attention_mask_mixup_x, labels_mixup_x)
         preds = logits.view(-1, self.config.num_classes)
         pred_probs = F.softmax(preds, dim=1)
         # accuracy
@@ -111,9 +119,8 @@ class LightningModel(LightningModule):
         labels_x = batch['labels_x']
         attention_mask_x = batch['attention_mask_x']
 
-        outputs = self.basic_forward(input_ids_x, attention_mask_x, labels_x)
-
-        logits = self.classifier(outputs[1])
+        logits = self.basic_forward(input_ids_x, attention_mask_x)
+        
         preds = logits.view(-1, self.config.num_classes)
         pred_probs = F.softmax(preds, dim=1)
         # accuracy
@@ -133,8 +140,7 @@ class LightningModel(LightningModule):
         input_ids_x = batch['input_ids_x']
         attention_mask_x = batch['attention_mask_x']
         labels_x = batch['labels_x']
-        outputs = self.basic_forward(input_ids_x, attention_mask_x, labels_x)
-        logits = self.classifier(outputs[1])
+        logits = self.basic_forward(input_ids_x, attention_mask_x)
 
         preds = logits.view(-1, self.config.num_classes)
 
