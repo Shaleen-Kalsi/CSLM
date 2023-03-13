@@ -5,6 +5,7 @@ from transformers import (
     AutoConfig,
     AutoModelForSequenceClassification,
     get_linear_schedule_with_warmup,
+    get_cosine_schedule_with_warmup
 )
 from torch.optim import AdamW
 import torch.nn.functional as F
@@ -133,6 +134,11 @@ class LightningModel(LightningModule):
         #    num_warmup_steps=warmup_steps,
         #    num_training_steps=self.trainer.estimated_stepping_batches,
         #)
-        scheduler = LinearWarmupCosineAnnealingLR(optimizer, warmup_epochs=5, max_epochs=10)
+        #scheduler = LinearWarmupCosineAnnealingLR(optimizer, warmup_epochs=5, max_epochs=30)
+        scheduler = get_cosine_schedule_with_warmup(
+            optimizer,
+            num_warmup_steps=5,
+            num_training_steps=self.config.epochs,
+        )
         scheduler = {"scheduler": scheduler, "interval": "step"}
         return [optimizer], [scheduler]
