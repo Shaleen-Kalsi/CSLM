@@ -8,12 +8,13 @@ Options:
     --type=<type>         Choose from ['lang_agnostic']
     --save_path=<save-path>    Save path for output csv
 """
-import os
+import torch
 from tqdm import tqdm
 import re
 import pandas as pd
 import numpy as np
 from docopt import docopt
+import flair
 from flair.data import Sentence
 from flair.models import SequenceTagger
 
@@ -28,35 +29,47 @@ def mask_tokens(df: pd.DataFrame) -> pd.DataFrame:
         masked sentence
     """
     tagger = SequenceTagger.load('pos')
+
+    if torch.cuda.is_available():
+        flair.device = torch.device('gpu')
+    else:
+        flair.device = torch.device('cpu') 
     
     masked_df = pd.DataFrame(columns=df.columns)
     idx = 0
     MASK = "<GIB>"
-    for i in tqdm(range(len(df))):
-        sentence = Sentence(df.loc[i, 'sentence'])
-        masked_sent_NN = sentence.text.split()
-        masked_sent_VB = sentence.text.split()
-        masked_sent_JJ = sentence.text.split()
+    batch_size = 10
+    for i in tqdm(range(0, len(df), batch_size)):
+        sentences = []
+        for k in range(batch_size):
+            sentences.append(Sentence(df.loc[i+k, 'sentence']))
+        tagger.predict(sentences)
 
-        tagger.predict(sentence)
-
-        for i, label in enumerate(sentence.get_labels('pos')):
-            if re.match('VB*', label.value) is not None:
-                masked_sent_NN[i] = MASK
-            if re.match('JJ*', label.value) is not None:
-                masked_sent_VB[i] = MASK
-            if re.match('NN*', label.value) is not None:
-                masked_sent_JJ[i] = MASK
-                
-        masked_df.loc[idx, 'sentence'] = " ".join(masked_sent_NN)
-        masked_df.loc[idx, 'label'] = df.loc[i, 'label']
-        idx += 1
-        masked_df.loc[idx, 'sentence'] = " ".join(masked_sent_VB)
-        masked_df.loc[idx, 'label'] = df.loc[i, 'label']
-        idx += 1
-        masked_df.loc[idx, 'sentence'] = " ".join(masked_sent_JJ)
-        masked_df.loc[idx, 'label'] = df.loc[i, 'label']
-        idx += 1
+        for sentence in sentences:
+            masked_sent_NN = []
+            masked_sent_VB = []
+            masked_sent_JJ = []
+            for j, label in enumerate(sentence.get_labels('pos')):
+                if re.match('VB*', label.value) is not None:
+                    masked_sent_NN.append(MASK)
+                if re.match('JJ*', label.value) is not None:
+                    masked_sent_VB.append(MASK)
+                if re.match('NN*', label.value) is not None:
+                    masked_sent_JJ.append(MASK)
+                else:
+                    masked_sent_JJ.append(sentence.tokens[j].text)
+                    masked_sent_VB.append(sentence.tokens[j].text)
+                    masked_sent_JJ.append(sentence.tokens[j].text)
+                    
+            masked_df.loc[idx, 'sentence'] = " ".join(masked_sent_NN)
+            masked_df.loc[idx, 'label'] = df.loc[i, 'label']
+            idx += 1
+            masked_df.loc[idx, 'sentence'] = " ".join(masked_sent_VB)
+            masked_df.loc[idx, 'label'] = df.loc[i, 'label']
+            idx += 1
+            masked_df.loc[idx, 'sentence'] = " ".join(masked_sent_JJ)
+            masked_df.loc[idx, 'label'] = df.loc[i, 'label']
+            idx += 1
         
     return masked_df
 
