@@ -35,7 +35,7 @@ class LightningModel(LightningModule):
             torch.nn.Linear(128, config.num_classes)
         )
         #print(self.classifier)
-        self.mixup_type = self.config.mixup_type
+        #self.mixup_type = self.config.mixup_type
 
         if config.num_classes == 2:
             task = 'binary'
@@ -62,12 +62,12 @@ class LightningModel(LightningModule):
         logits = self.classifier(x)
         return logits
 
-    def forward(self, input_ids_x, attention_mask_x, labels_x, lam, apply_mixup, input_ids_mixup_x = None, attention_mask_mixup_x = None, labels_mixup_x = None):
-        if apply_mixup is True:
-            return self.mixup_forward(input_ids_x, input_ids_mixup_x, attention_mask_x, attention_mask_mixup_x, lam)
-        else:
-            logits = self.basic_forward(input_ids_x, attention_mask_x)
-            return logits
+    def forward(self, input_ids_x, attention_mask_x, labels_x, lam, input_ids_mixup_x = None, attention_mask_mixup_x = None, labels_mixup_x = None):
+        #if apply_mixup is True:
+        return self.mixup_forward(input_ids_x, input_ids_mixup_x, attention_mask_x, attention_mask_mixup_x, lam)
+        #else:
+            #logits = self.basic_forward(input_ids_x, attention_mask_x)
+            #return logits
 
 
     def training_step(self, batch, batch_idx):
@@ -90,8 +90,8 @@ class LightningModel(LightningModule):
 
         #token_type_ids = batch['token_type_ids']
         # fwd
-        apply_mixup = True
-        logits = self(input_ids_x, attention_mask_x, labels_x, lam,  apply_mixup, input_ids_mixup_x, attention_mask_mixup_x, labels_mixup_x)
+        #apply_mixup = True
+        logits = self(input_ids_x, attention_mask_x, labels_x, lam, input_ids_mixup_x, attention_mask_mixup_x, labels_mixup_x)
         preds = logits.view(-1, self.config.num_classes)
         pred_probs = F.softmax(preds, dim=1)
         # accuracy
@@ -115,18 +115,18 @@ class LightningModel(LightningModule):
 
     def validation_step(self, batch, batch_idx, dataloader_idx=0):
 
-        input_ids_x = batch['input_ids_x']
-        labels_x = batch['labels_x']
-        attention_mask_x = batch['attention_mask_x']
+        input_ids = batch['input_ids']
+        labels = batch['labels']
+        attention_mask_x = batch['attention_mask']
 
-        logits = self.basic_forward(input_ids_x, attention_mask_x)
+        logits = self.basic_forward(input_ids, attention_mask_x)
         
         preds = logits.view(-1, self.config.num_classes)
         pred_probs = F.softmax(preds, dim=1)
         # accuracy
-        acc = self.accuracy(preds, torch.argmax(labels_x, dim=1))
+        acc = self.accuracy(preds, torch.argmax(labels, dim=1))
         # loss
-        loss = self.loss_fn(preds, labels_x)
+        loss = self.loss_fn(preds, labels)
 
         return {"val_loss": loss, "val_acc": acc}
 
@@ -137,18 +137,18 @@ class LightningModel(LightningModule):
         self.log('val/acc',val_acc, on_step=False, on_epoch=True, prog_bar=True)
 
     def test_step(self, batch, batch_idx, dataloader_idx=0):
-        input_ids_x = batch['input_ids_x']
-        attention_mask_x = batch['attention_mask_x']
-        labels_x = batch['labels_x']
-        logits = self.basic_forward(input_ids_x, attention_mask_x)
+        input_ids = batch['input_ids']
+        attention_mask = batch['attention_mask']
+        labels = batch['labels']
+        logits = self.basic_forward(input_ids, attention_mask)
 
         preds = logits.view(-1, self.config.num_classes)
 
         pred_probs = F.softmax(preds, dim=1)
         # accuracy
-        acc = self.accuracy(preds, torch.argmax(labels_x, dim=1))
+        acc = self.accuracy(preds, torch.argmax(labels, dim=1))
         # loss
-        loss = self.loss_fn(preds, labels_x)
+        loss = self.loss_fn(preds, labels)
 
         return {"test_loss": loss, "test_acc": acc}
 

@@ -21,6 +21,8 @@ tqdm = "^4.64.1"
 datasplit_SA = "cslm.data.create_splits_SA:main"
 datasplit_HS = "cslm.data.create_splits_HS:main"
 static_da = "cslm.data.static_data_augmentation:main"
+preprocess_sa_hindi = "cslm.data.preprocess_sa_hindi:main"
+preprocess_sa_english = "cslm.data.preprocess_sa_english:main"
 train = "cslm.train:main"
 test = "cslm.test:main"
 

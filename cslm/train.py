@@ -44,7 +44,8 @@ def main():
     train_set = CSLMDataset(
         CSVPath = config.train_path,
         hparams = config,
-        is_train=True
+        is_train=True,
+        CSVPathMixup = config.hindi_mono_path,
     )
     train_loader = data.DataLoader(
         train_set, 
@@ -53,6 +54,7 @@ def main():
         num_workers=config.n_workers,
     )
     # Validation
+    config.apply_mixup = False
     valid_set = CSLMDataset(
         CSVPath = config.val_path,
         hparams = config,

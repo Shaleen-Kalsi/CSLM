@@ -1,12 +1,13 @@
 {
     "model_name": "CSLM",
-    "proj_dir": "/C:/Users/shale/OneDrive/Documents/CourseBooks/Mlp/CW4/MLP/cslm",
+    "proj_dir": "/home/s2424283/ml-repo/dynamic-data-aug/MLP",
     "run_name": "bert-base-multilingual-uncased-dynamic-data-aug-1",
     "data": {
-        "dir": "C:/Users/shale/OneDrive/Documents/CourseBooks/Mlp/CW4/MLP/cslm/data",
-        "train_path": "$dir/sa_hinglish_train.csv",
+        "dir": "/home/s2424283/ml-repo/dynamic-data-aug/MLP/cslm/data",
+        "train_path": "$dir/sa_english_preprocessed_train.csv",
         "test_path": "$dir/sa_hinglish_test.csv",
-        "val_path": "$dir/sa_hinglish_val.csv"
+        "val_path": "$dir/sa_hinglish_val.csv",
+        "hindi_mono_path": "$dir/sa_hindi_rom_preprocessed_tweets.csv"
     },
     "hparams": {
         "batch_size": "4",
@@ -15,9 +16,9 @@
         "weight_decay" : "0.0",
         "upstream_model": "bert-base-multilingual-uncased",
         "freeze": "false",
-        "model_checkpt": null,
+        "model_checkpt": "/home/s2424283/ml-repo/MLP/checkpoints/bert-base-multilingual-uncased-shaleen-epoch=1.ckpt",
         "save_dir": "$proj_dir/checkpoints",
-        "mixup_type": "dynamic-finetune",
+        "apply_mixup": "true",
         "_comment": "Other models to choose from: 'bert-base-multilingual-cased', 'xlm-roberta-base', 'indic-bert"
     },
     "accelerator": "gpu",

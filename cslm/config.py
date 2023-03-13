@@ -10,6 +10,7 @@ class CSLMConfig():
         self.dir = config['proj_dir']
         self.data_dir = config['data']['dir']
         self.train_path = config['data']['train_path'].replace('$dir', self.data_dir)
+        self.hindi_mono_path = config['data']['hindi_mono_path'].replace('$dir', self.data_dir)
         self.test_path = config['data']['test_path'].replace('$dir', self.data_dir)
         self.val_path = config['data']['val_path'].replace('$dir', self.data_dir)
 
@@ -29,7 +30,7 @@ class CSLMConfig():
         self.save_dir = config["hparams"]["save_dir"].replace('$proj_dir', self.dir)
 
         # data augmentation technique to use - dynamic/static
-        self.mixup_type = config["hparams"]["mixup_type"]
+        self.apply_mixup = config["hparams"]["apply_mixup"]
 
         self.run_name = config['run_name']
         
