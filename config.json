@@ -19,7 +19,7 @@
         "model_checkpt": "/home/s2424283/ml-repo/MLP/checkpoints/bert-base-multilingual-uncased-shaleen-epoch=1.ckpt",
         "save_dir": "$proj_dir/checkpoints",
         "apply_mixup": "true",
-        "_comment": "Other models to choose from: 'bert-base-multilingual-cased', 'xlm-roberta-base', 'indic-bert"
+        "_comment": "Other models to choose from: 'bert-base-multilingual-cased', 'xlm-roberta-base', 'ai4bharat/indic-bert"
     },
     "accelerator": "gpu",
     "devices": 1,

@@ -6,6 +6,7 @@ from transformers import (
     AutoModelForSequenceClassification,
     get_linear_schedule_with_warmup,
     BertModel,
+    AutoModel,
 )
 from torch.optim import AdamW
 import numpy as np
@@ -18,15 +19,11 @@ class LightningModel(LightningModule):
         self.config = config
         self.save_hyperparameters()
         self.auto_config = AutoConfig.from_pretrained(self.config.upstream_model, num_labels=config.num_classes)
+        if self.config.upsream_model == "bert-base-multilingual-uncased":
+            self.model = BertModel.from_pretrained(self.config.upstream_model, config=self.auto_config)
+        else:
+            self.model = AutoModel.from_pretrained(self.config.upstream_model, config=self.auto_config)
 
-        #self.model = AutoModelForSequenceClassification.from_pretrained(self.config.upstream_model, config=self.auto_config)
-        self.model = BertModel.from_pretrained(self.config.upstream_model, config=self.auto_config)
-        #print(self.model)
-        #print("*******************************************************************************************")
-        #bert_params = list(self.model.named_parameters())
-        #x = self.model(0, 0)[0][-1]
-        #print("x:", x)
-        #print(bert_params[17][1])
         self.loss_fn = torch.nn.CrossEntropyLoss()
         input_dim = 768
         self.classifier = torch.nn.Sequential(
@@ -34,8 +31,6 @@ class LightningModel(LightningModule):
             torch.nn.ReLU(),
             torch.nn.Linear(128, config.num_classes)
         )
-        #print(self.classifier)
-        #self.mixup_type = self.config.mixup_type
 
         if config.num_classes == 2:
             task = 'binary'
@@ -52,6 +47,7 @@ class LightningModel(LightningModule):
         outputs = self.model(input_ids=input_ids, attention_mask=attention_mask)
         logits = self.classifier(outputs[1])
         return logits
+
 
     def mixup_forward(self, input_ids_x, input_ids_mixup_x, attention_mask_x, attention_mask_mixup_x, lam):
         x = self.model(input_ids=input_ids_x, attention_mask=attention_mask_x)[1]
