@@ -18,7 +18,7 @@
         "model_checkpt": "/home/kritianandan/UoE/cslm/checkpoints/BERT-base-epoch=4.ckpt",
         "save_dir": "$proj_dir/checkpoints",
         "mixup_type": "dynamic",
-        "_comment": "Other models to choose from: 'bert-base-multilingual-cased', 'xlm-roberta-base', 'indic-bert"
+        "_comment": "Other models to choose from: 'bert-base-multilingual-cased', 'xlm-roberta-base', 'ai4bharat/indic-bert"
     },
     "accelerator": "cpu",
     "devices": 1,
