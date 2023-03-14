@@ -1,29 +1,31 @@
 {
     "model_name": "CSLM",
-    "proj_dir": "/home/s2424283/ml-repo/dynamic-data-aug/MLP",
+    "proj_dir": "/C:/Users/shale/OneDrive/Documents/CourseBooks/Mlp/CW4/MLP",
     "run_name": "bert-base-multilingual-uncased-dynamic-data-aug-1",
     "data": {
-        "dir": "/home/s2424283/ml-repo/dynamic-data-aug/MLP/cslm/data",
-        "train_path": "$dir/sa_english_preprocessed_train.csv",
+        "dir": "C:/Users/shale/OneDrive/Documents/CourseBooks/Mlp/CW4/MLP/cslm/data",
+        "train_path": "$dir/sa_hinglish_train.csv",
         "test_path": "$dir/sa_hinglish_test.csv",
         "val_path": "$dir/sa_hinglish_val.csv",
-        "hindi_mono_path": "$dir/sa_hindi_rom_preprocessed_tweets.csv"
+        "english_mono_path": "$dir/sa_english_preprocessed_train.csv",
+        "hindi_mono_path": "$dir/sa_hindi_rom_preprocessed_tweets.csv",
+        "mixup_path": "$dir/mixup_eng_hindi_mono.csv"
     },
     "hparams": {
         "batch_size": "4",
         "epochs": "5",
         "lr": "1e-5",
         "weight_decay" : "0.0",
-        "upstream_model": "bert-base-multilingual-uncased",
-        "freeze": "false",
-        "model_checkpt": "/home/s2424283/ml-repo/MLP/checkpoints/bert-base-multilingual-uncased-shaleen-epoch=1.ckpt",
+        "upstream_model": "ai4bharat/indic-bert",
+        "freeze": "False",
+        "model_checkpt": null,
         "save_dir": "$proj_dir/checkpoints",
-        "apply_mixup": "true",
+        "apply_mixup": "True",
         "_comment": "Other models to choose from: 'bert-base-multilingual-cased', 'xlm-roberta-base', 'ai4bharat/indic-bert"
     },
-    "accelerator": "gpu",
+    "accelerator": "cpu",
     "devices": 1,
-    "n_workers": 1,
+    "n_workers": 6,
     "num_classes": 3,
     "max_seq_length": 128
 }

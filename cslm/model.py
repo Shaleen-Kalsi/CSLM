@@ -19,10 +19,8 @@ class LightningModel(LightningModule):
         self.config = config
         self.save_hyperparameters()
         self.auto_config = AutoConfig.from_pretrained(self.config.upstream_model, num_labels=config.num_classes)
-        if self.config.upsream_model == "bert-base-multilingual-uncased":
-            self.model = BertModel.from_pretrained(self.config.upstream_model, config=self.auto_config)
-        else:
-            self.model = AutoModel.from_pretrained(self.config.upstream_model, config=self.auto_config)
+        
+        self.model = AutoModel.from_pretrained(self.config.upstream_model, config=self.auto_config)
 
         self.loss_fn = torch.nn.CrossEntropyLoss()
         input_dim = 768
@@ -31,6 +29,8 @@ class LightningModel(LightningModule):
             torch.nn.ReLU(),
             torch.nn.Linear(128, config.num_classes)
         )
+
+        self.apply_mixup = config.apply_mixup
 
         if config.num_classes == 2:
             task = 'binary'
@@ -68,36 +68,48 @@ class LightningModel(LightningModule):
 
     def training_step(self, batch, batch_idx):
         # batch
-        print("start training")
-        input_ids_x = batch['input_ids_x']
-        input_ids_mixup_x = batch['input_ids_mixup_x']
-        labels_x = batch['labels_x']
-        labels_mixup_x = batch['labels_mixup_x']
-        attention_mask_x = batch['attention_mask_x']
-        attention_mask_mixup_x = batch['attention_mask_mixup_x']
 
-        alpha = 0.5
-        lam = np.random.beta(alpha, alpha)
+        logits = None
+        labels = None
 
-        #construct the mixup label
-        #labels_x = torch.stack(labels_x)
-        #labels_mixup_x = torch.stack(labels_mixup_x)
-        labels_x = lam*labels_x + (1-lam)*labels_mixup_x
+        if self.apply_mixup == "True":
+            input_ids_x = batch['input_ids_x']
+            input_ids_mixup_x = batch['input_ids_mixup_x']
+            labels_x = batch['labels_x']
+            labels_mixup_x = batch['labels_mixup_x']
+            attention_mask_x = batch['attention_mask_x']
+            attention_mask_mixup_x = batch['attention_mask_mixup_x']
+            alpha = 0.5
+            lam = np.random.beta(alpha, alpha)
 
-        #token_type_ids = batch['token_type_ids']
-        # fwd
-        #apply_mixup = True
-        logits = self(input_ids_x, attention_mask_x, labels_x, lam, input_ids_mixup_x, attention_mask_mixup_x, labels_mixup_x)
+            #construct the mixup label
+            #labels_x = torch.stack(labels_x)
+            #labels_mixup_x = torch.stack(labels_mixup_x)
+            labels_x = lam*labels_x + (1-lam)*labels_mixup_x
+            labels = labels_x
+
+            #token_type_ids = batch['token_type_ids']
+            # fwd
+            #apply_mixup = True
+            logits = self(input_ids_x, attention_mask_x, labels_x, lam, input_ids_mixup_x, attention_mask_mixup_x, labels_mixup_x)
+            
+        else:
+            input_ids = batch['input_ids']
+            attention_mask = batch['attention_mask']
+            labels = batch['labels']
+            logits = self.basic_forward(input_ids, attention_mask)
+
+        
         preds = logits.view(-1, self.config.num_classes)
         pred_probs = F.softmax(preds, dim=1)
         # accuracy
         # float tensor of shape (N, C, ..), if preds is a floating point we apply torch.argmax along the C dimension 
         # to automatically convert probabilities/logits into an int tensor.
-        acc = self.accuracy(preds, torch.argmax(labels_x, dim=1))
+        acc = self.accuracy(preds, torch.argmax(labels, dim=1))
         # loss
         # torch.nn.CrossEntropyLoss() combines nn.LogSoftmax() and nn.NLLLoss() in one single class.
         # Therefore, you should not use softmax before.
-        loss = self.loss_fn(preds, labels_x)
+        loss = self.loss_fn(preds, labels)
 
         return {'loss': loss, 'acc': acc} # For backprop
 

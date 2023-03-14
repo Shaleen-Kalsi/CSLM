@@ -11,6 +11,8 @@ class CSLMConfig():
         self.data_dir = config['data']['dir']
         self.train_path = config['data']['train_path'].replace('$dir', self.data_dir)
         self.hindi_mono_path = config['data']['hindi_mono_path'].replace('$dir', self.data_dir)
+        self.english_mono_path = config['data']['english_mono_path'].replace('$dir', self.data_dir)
+        self.mixup_path = config['data']['mixup_path'].replace('$dir', self.data_dir)
         self.test_path = config['data']['test_path'].replace('$dir', self.data_dir)
         self.val_path = config['data']['val_path'].replace('$dir', self.data_dir)
 

@@ -41,8 +41,8 @@ def main():
     logging.info("Getting Predictions..")
     for i in tqdm(range(len(test_df))):
         data = test_set[i]
-        input_ids = data["input_ids_x"].view(1, -1)
-        attention_mask = data["attention_mask_x"].view(1, -1)
+        input_ids = data["input_ids"].view(1, -1)
+        attention_mask = data["attention_mask"].view(1, -1)
         logits = model.basic_forward(input_ids, attention_mask)
         preds = logits.view(-1, config.num_classes).argmax(dim=1).detach().cpu().numpy().astype(int)[0]
         test_df.loc[i, 'predictions'] = num2labels[preds]

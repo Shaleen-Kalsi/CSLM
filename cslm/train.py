@@ -41,12 +41,23 @@ def main():
     
     # Train
     logging.info("Setting up dataloaders..")
-    train_set = CSLMDataset(
-        CSVPath = config.train_path,
-        hparams = config,
-        is_train=True,
-        CSVPathMixup = config.hindi_mono_path,
-    )
+
+    if config.apply_mixup == "False":
+        train_set = CSLMDataset(
+            CSVPath = config.train_path,
+            hparams = config,
+            is_train=True
+        )
+    else:
+        train_set = CSLMDataset(
+            CSVPath = config.english_mono_path,
+            hparams = config,
+            is_train=True,
+            CSVPathMixup = config.hindi_mono_path,
+            apply_mixup=True
+        )
+
+    
     train_loader = data.DataLoader(
         train_set, 
         batch_size=config.batch_size, 
@@ -54,7 +65,7 @@ def main():
         num_workers=config.n_workers,
     )
     # Validation
-    config.apply_mixup = False
+
     valid_set = CSLMDataset(
         CSVPath = config.val_path,
         hparams = config,
