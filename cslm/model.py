@@ -5,7 +5,9 @@ from transformers import (
     AutoConfig,
     AutoModelForSequenceClassification,
     get_linear_schedule_with_warmup,
-    get_cosine_schedule_with_warmup
+    get_cosine_schedule_with_warmup,
+    BertModel,
+    AutoModel,
 )
 from torch.optim import AdamW
 import torch.nn.functional as F
@@ -18,7 +20,19 @@ class LightningModel(LightningModule):
         self.config = config
         self.save_hyperparameters()
         self.auto_config = AutoConfig.from_pretrained(self.config.upstream_model, num_labels=config.num_classes)
-        self.model = AutoModelForSequenceClassification.from_pretrained(self.config.upstream_model, config=self.auto_config)
+        
+        self.classifier = None
+        if self.config.upstream_model == "ai4bharat/indic-bert":
+            self.model = AutoModel.from_pretrained(self.config.upstream_model, config=self.auto_config)
+            input_dim = 768
+            self.classifier = torch.nn.Sequential(
+                torch.nn.Linear(input_dim, 128),
+                torch.nn.ReLU(),
+                torch.nn.Linear(128, config.num_classes)
+            )
+        else:
+            self.model = AutoModelForSequenceClassification.from_pretrained(self.config.upstream_model, config=self.auto_config)          
+
         self.loss_fn = torch.nn.CrossEntropyLoss()
         if config.num_classes == 2:
             task = 'binary'
@@ -32,7 +46,14 @@ class LightningModel(LightningModule):
                     param.requires_grad = False
 
     def forward(self, input_ids, attention_mask):
-        return self.model(input_ids=input_ids, attention_mask=attention_mask) 
+        outputs = self.model(input_ids=input_ids, attention_mask=attention_mask)
+
+        if self.config.upstream_model == "ai4bharat/indic-bert":
+            logits = self.classifier(outputs[1])
+            return logits
+        
+        return outputs
+
 
     def training_step(self, batch, batch_idx):
         # batch
@@ -44,7 +65,9 @@ class LightningModel(LightningModule):
         outputs = self(input_ids, attention_mask) # outputs are from a linear FC, NOT SOFTMAX
         # Tuple containing loss[in this case loss is not calculated], logits, hidden states and attentions,
         # since loss is None, only one element in tuple
-        logits = outputs[0] 
+        logits = outputs
+        if self.config.upstream_model != "ai4bharat/indic-bert":
+            logits = outputs[0]
         preds = logits.view(-1, self.config.num_classes)
         pred_probs = F.softmax(preds, dim=1)
         # accuracy
@@ -72,7 +95,9 @@ class LightningModel(LightningModule):
         outputs = self(input_ids, attention_mask)
 
         labels = batch["labels"]
-        logits = outputs[0]
+        logits = outputs
+        if self.config.upstream_model != "ai4bharat/indic-bert":
+            logits = outputs[0]
         preds = logits.view(-1, self.config.num_classes)
         pred_probs = F.softmax(preds, dim=1)
         # accuracy
@@ -94,7 +119,9 @@ class LightningModel(LightningModule):
         outputs = self(input_ids, attention_mask)
 
         labels = batch["labels"]
-        logits = outputs[0]
+        logits = outputs
+        if self.config.upstream_model != "ai4bharat/indic-bert":
+            logits = outputs[0]
 
         preds = logits.view(-1, self.config.num_classes)
         pred_probs = F.softmax(preds, dim=1)
