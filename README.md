@@ -3,17 +3,26 @@
 ## Setup instructions
 
 > Note: Changing the directory structure of 'cslm' package might break poetry scripts.
-Using poetry  
+
+POETRY BEING A PAIN IN THE [ASS](https://github.com/python-poetry/poetry/issues/4231)
+
+Create separate environments for running static augmentation and normal training process. We ran into a lot of dependency conflicts.
+
+Create an environment with the Python version 3.10.0
 ```
-pip install poetry
-poetry install
+conda create -n cslm-env python==3.10.0
+conda activate cslm-env
+pip install -r requirements.txt
 ```
 
-Alternate way to install pytorch + GPU on Google Cloud Platform using pip
+Use a separate environment for running static data agumentation
+
 ```
-poetry remove torch
-pip install torch>=1.12.0+cu116 torchvision>=0.13.0+cu116 torchaudio>=0.13.0 --extra-index-url https://download.pytorch.org/whl/cu116
+pip install -r flair-requirements.txt
 ```
+
+
+
 
 `pip install flair` [breaks](https://github.com/flairNLP/flair/issues/2969) for some python versions. So install it separately.
 ```
