@@ -24,7 +24,7 @@ print(torch.cuda.is_available())
 
 
 # set to online to use wandb
-os.environ["WANDB_MODE"] = "offline"
+os.environ["WANDB_MODE"] = "online"
 logging.basicConfig(level=logging.INFO)
 
 def main():

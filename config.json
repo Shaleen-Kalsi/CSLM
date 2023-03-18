@@ -1,28 +1,28 @@
 {
     "model_name": "CSLM",
-    "proj_dir": "/home/kritianandan/UoE/cslm",
-    "run_name": "BERT-base",
+    "proj_dir": "/home/shale/MLP/cslm",
+    "run_name": "bert-base-cased-test-shaleen-baseline-v1",
     "data": {
-        "dir": "/home/kritianandan/UoE/cslm/cslm/data",
+        "dir": "/home/shale/MLP/cslm/data",
         "train_path": "$dir/sa_hinglish_train.csv",
         "test_path": "$dir/sa_hinglish_test.csv",
         "val_path": "$dir/sa_hinglish_val.csv"
     },
     "hparams": {
-        "batch_size": "5",
-        "epochs": "5",
+        "batch_size": "20",
+        "epochs": "30",
         "lr": "1e-5",
         "weight_decay" : "0.0",
         "upstream_model": "bert-base-cased",
-        "freeze": "true",
-        "model_checkpt": "/home/kritianandan/UoE/cslm/checkpoints/BERT-base-epoch=4.ckpt",
+        "freeze": "false",
+        "model_checkpt": "/home/shale/MLP/cslm/checkpoints/bert-base-cased-shaleen-baseline-v1-epoch=1.ckpt",
         "save_dir": "$proj_dir/checkpoints",
         "mixup_type": "dynamic",
         "_comment": "Other models to choose from: 'bert-base-multilingual-cased', 'xlm-roberta-base', 'ai4bharat/indic-bert"
     },
-    "accelerator": "cpu",
+    "accelerator": "gpu",
     "devices": 1,
-    "n_workers": 2,
+    "n_workers": 4,
     "num_classes": 3,
     "max_seq_length": 128
 }

@@ -7,6 +7,7 @@ Options:
     --config=<config-file>   Path to config file containing hyperparameter info used in training
 """
 import torch
+import ast
 import numpy as np
 import logging
 from docopt import docopt
@@ -47,6 +48,7 @@ def main():
     model = LightningModel.load_from_checkpoint(config.model_checkpt, config=config)
     if torch.cuda.is_available():
         model.to('cuda')
+    print("cuda available", torch.cuda.is_available())
     model.eval() # evaluation mode
     test_df["predictions"] = ""
     test_df["probs"] = ""
@@ -58,14 +60,14 @@ def main():
         input_ids = data["input_ids"].view(1, -1)
         attention_mask = data["attention_mask"].view(1, -1)
         if torch.cuda.is_available():
-            input_ids.cuda()
-            attention_mask.cuda()
+            input_ids = input_ids.to(device = 'cuda')
+            attention_mask = attention_mask.to(device = 'cuda')
         outputs = model(input_ids=input_ids, attention_mask=attention_mask)
         logits = outputs[0] 
         probs = logits.view(-1, config.num_classes).detach().cpu().numpy().astype(float)[0]
         preds = logits.view(-1, config.num_classes).argmax(dim=1).detach().cpu().numpy().astype(int)[0]
         test_df.loc[i, 'predictions'] = num2labels[preds]
-        test_df.loc[i, 'probs'] = probs
+        test_df.at[i, 'probs'] = probs
     
     labels = list(test_df['label'])
     preds = list(test_df['predictions'])
@@ -77,8 +79,8 @@ def main():
 
     # conver to numpy array for ECE
     # convert to one hot
-    y = numpy_one_hot([labels2num[l] for l in labels], config.num_classes)
-    y_pred_probs = np.array(test_df["probs"])
-    print("ECE metric: {}", ECEMetric(y, y_pred_probs))
+    y = numpy_one_hot(np.array([test_set.labels2num[l] for l in labels]), config.num_classes)
+    y_pred_probs = np.array(list(test_df["probs"]))
+    print("ECE metric: ", ECEMetric(y, y_pred_probs))
 
     
