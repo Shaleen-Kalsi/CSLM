@@ -55,6 +55,7 @@ def sa_english_to_sentence_label(csv_path):
     dataset = dataset.drop(columns = ["id", "date", "query", "name"])
     dataset = dataset.dropna(subset = "sentence").reset_index(drop=True)
     dataset = dataset.replace({"label":{4: "positive", 0: "negative"}})
+    dataset = dataset.reindex(columns = ["sentence", "label"])
     dataset = dataset.sample(n = 100000, random_state=42).reset_index(drop=True) #16 million samples are too heavy
     return dataset
 
@@ -120,32 +121,32 @@ def main():
     args = docopt(__doc__)
     path = args['--csv']
     data = path[path.rfind("/")+1:path.rfind(".")]
-    if data == "sa_hinglish":
+    if data == "sa_hinglish_raw":
         dataset = sa_hinglish_to_sentence_label(args['--csv']) 
         dataset = preprocess(dataset)
-        out_path = path[:path.rfind(".")] + "_reformatted.csv"
+        out_path = path[:path.rfind("_")] + ".csv"
         dataset.to_csv(out_path, index=False)
-    elif data == "sa_english":
+    elif data == "sa_english_raw":
         dataset = sa_english_to_sentence_label(args['--csv']) 
         dataset = preprocess(dataset)
-        out_path = path[:path.rfind(".")] + "_reformatted.csv"
+        out_path = path[:path.rfind("_")] + ".csv"
         dataset.to_csv(out_path, index=False)
-    elif data == "sa_tamil":
+    elif data == "sa_tamil_raw":
         dataset = sa_drav_to_sentence_label(args['--csv']) 
         dataset = preprocess(dataset)
-        out_path = path[:path.rfind(".")] + "_reformatted.csv"
+        out_path = path[:path.rfind("_")] + ".csv"
         dataset.to_csv(out_path, index=False)
-    elif data == "sa_malayalam":
+    elif data == "sa_malayalam_raw":
         dataset = sa_drav_to_sentence_label(args['--csv']) 
         dataset = preprocess(dataset)
-        out_path = path[:path.rfind(".")] + "_reformatted.csv"
+        out_path = path[:path.rfind("_")] + ".csv"
         dataset.to_csv(out_path, index=False)
 
     #creating splits
     #80, 10, 10 split
     train, validate, test = np.split(dataset.sample(frac=1, random_state=42), [int(.8*len(dataset)), int(.9*len(dataset))])
 
-    out_dir = path[:path.rfind(".")]
+    out_dir = path[:path.rfind("_")]
     
     train_path = out_dir + "_train.csv"
     train.to_csv(train_path, index=False)
