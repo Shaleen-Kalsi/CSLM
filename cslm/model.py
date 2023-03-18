@@ -36,8 +36,7 @@ class LightningModel(LightningModule):
                     param.requires_grad = False
 
     def forward(self, input_ids, attention_mask):
-        outputs = self.model(input_ids=input_ids, attention_mask=attention_mask)
-        
+        outputs = self.model(input_ids=input_ids, attention_mask=attention_mask)        
         return outputs
 
 
