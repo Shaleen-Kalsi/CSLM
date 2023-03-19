@@ -4,13 +4,15 @@ from pytorch_lightning import LightningModule
 from transformers import (
     AutoConfig,
     AutoModelForSequenceClassification,
-    get_linear_schedule_with_warmup,
     BertModel,
     AutoModel,
+    get_linear_schedule_with_warmup,
+    get_cosine_schedule_with_warmup,
 )
 from torch.optim import AdamW
 import numpy as np
 import torch.nn.functional as F
+from pl_bolts.optimizers.lr_scheduler import LinearWarmupCosineAnnealingLR
 
 class LightningModel(LightningModule):
     def __init__(self, config):
@@ -125,9 +127,9 @@ class LightningModel(LightningModule):
 
         input_ids = batch['input_ids']
         labels = batch['labels']
-        attention_mask_x = batch['attention_mask']
+        attention_mask = batch['attention_mask']
 
-        logits = self.basic_forward(input_ids, attention_mask_x)
+        logits = self.basic_forward(input_ids, attention_mask)
         
         preds = logits.view(-1, self.config.num_classes)
         pred_probs = F.softmax(preds, dim=1)
@@ -183,11 +185,17 @@ class LightningModel(LightningModule):
             },
         ]
         optimizer = AdamW(optimizer_grouped_parameters, lr=self.config.lr, eps=adam_epsilon)
-        
-        scheduler = get_linear_schedule_with_warmup(
+
+        #scheduler = get_linear_schedule_with_warmup(
+        #    optimizer,
+        #    num_warmup_steps=warmup_steps,
+        #    num_training_steps=self.trainer.estimated_stepping_batches,
+        #)
+        #scheduler = LinearWarmupCosineAnnealingLR(optimizer, warmup_epochs=5, max_epochs=30)
+        scheduler = get_cosine_schedule_with_warmup(
             optimizer,
-            num_warmup_steps=warmup_steps,
-            num_training_steps=self.trainer.estimated_stepping_batches,
+            num_warmup_steps=5,
+            num_training_steps=self.config.epochs,
         )
-        scheduler = {"scheduler": scheduler, "interval": "step", "frequency": 1}
+        scheduler = {"scheduler": scheduler, "interval": "step"}
         return [optimizer], [scheduler]

@@ -1,31 +1,31 @@
 {
     "model_name": "CSLM",
-    "proj_dir": "/C:/Users/shale/OneDrive/Documents/CourseBooks/Mlp/CW4/MLP",
-    "run_name": "bert-base-multilingual-uncased-dynamic-data-aug-1",
+    "proj_dir": "/home/shale/dynamic-data-aug-mono/MLP",
+    "run_name": "xlm-roberta-base-shaleen-dynamic-data-aug-cs-v3",
     "data": {
-        "dir": "C:/Users/shale/OneDrive/Documents/CourseBooks/Mlp/CW4/MLP/cslm/data",
+        "dir": "/home/shale/dynamic-data-aug-mono/MLP/cslm/data",
         "train_path": "$dir/sa_hinglish_train.csv",
         "test_path": "$dir/sa_hinglish_test.csv",
         "val_path": "$dir/sa_hinglish_val.csv",
-        "english_mono_path": "$dir/sa_english_preprocessed_train.csv",
-        "hindi_mono_path": "$dir/sa_hindi_rom_preprocessed_tweets.csv",
-        "mixup_path": "$dir/mixup_eng_hindi_mono.csv"
+        "english_mono_path": "$dir/sa_hinglish_train.csv",
+        "hindi_mono_path": "$dir/sa_hinglish_train.csv",
+        "mixup_path": "$dir/mixup_hinglish-xlm-roberta-final.csv"
     },
     "hparams": {
-        "batch_size": "4",
-        "epochs": "5",
+        "batch_size": "20",
+        "epochs": "30",
         "lr": "1e-5",
         "weight_decay" : "0.0",
-        "upstream_model": "ai4bharat/indic-bert",
+        "upstream_model": "xlm-roberta-base",
         "freeze": "False",
-        "model_checkpt": null,
+        "model_checkpt": "/home/shale/dynamic-data-aug-mono/MLP/checkpoints/xlm-roberta-base-shaleen-dynamic-data-aug-baseline-v1-epoch=3.ckpt",
         "save_dir": "$proj_dir/checkpoints",
         "apply_mixup": "True",
         "_comment": "Other models to choose from: 'bert-base-multilingual-cased', 'xlm-roberta-base', 'ai4bharat/indic-bert"
     },
-    "accelerator": "cpu",
+    "accelerator": "gpu",
     "devices": 1,
-    "n_workers": 6,
+    "n_workers": 4,
     "num_classes": 3,
     "max_seq_length": 128
 }

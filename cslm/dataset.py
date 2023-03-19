@@ -15,7 +15,7 @@ class CSLMDataset(Dataset):
         self.apply_mixup = apply_mixup
         if self.apply_mixup:
             self.data = pd.read_csv(CSVPath)[:6000]
-            self.mixup = pd.read_csv(CSVPathMixup)[:6000]
+            #self.mixup = pd.read_csv(CSVPathMixup)[:6000]
         self.tokenizer = AutoTokenizer.from_pretrained(hparams.upstream_model, use_fast=True)
         self.labels2num = {"positive": 0, "negative": 1, "neutral": 2}
         self.mixup_file_path = self.hparams.mixup_path
@@ -25,9 +25,12 @@ class CSLMDataset(Dataset):
 
     def __getitem__(self, idx):
         if self.apply_mixup == True:
-            idx = random.randint(0, 5999)
+            #idx = random.randint(0, 5999)
+            mixup_data = self.data.sample(n= 1, random_state= 24)
+            
             sentence = self.data.iloc[idx, 0]
-            sentence_mixup = self.mixup.iloc[idx,0]
+            sentence_mixup = mixup_data.iloc[0,0]
+
 
 
             #convert label to one-hot
@@ -36,7 +39,7 @@ class CSLMDataset(Dataset):
             target_label = one_hot(torch.tensor(label_num, dtype=torch.int64), self.hparams.num_classes).float() # throws an error that an index tensor is required with torch.int8, cross entropy requires float tensors
             encoding = self.tokenizer.encode_plus(sentence, max_length=128, padding = 'max_length', truncation=True, add_special_tokens=True, return_attention_mask=True, return_tensors='pt')
 
-            label_mixup = self.mixup.iloc[idx,1]
+            label_mixup = mixup_data.iloc[0,1]
             label_num_mixup = self.labels2num[label_mixup]
             target_label_mixup = one_hot(torch.tensor(label_num_mixup, dtype=torch.int64), self.hparams.num_classes).float() # throws an error that an index tensor is required with torch.int8, cross entropy requires float tensors
             encoding_mixup = self.tokenizer.encode_plus(sentence_mixup, max_length=128, padding = 'max_length', truncation=True, add_special_tokens=True, return_attention_mask=True, return_tensors='pt')

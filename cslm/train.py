@@ -24,7 +24,7 @@ print(torch.cuda.is_available())
 
 
 # set to online to use wandb
-os.environ["WANDB_MODE"] = "offline"
+os.environ["WANDB_MODE"] = "online"
 logging.basicConfig(level=logging.INFO)
 
 def main():
@@ -50,7 +50,7 @@ def main():
         )
     else:
         train_set = CSLMDataset(
-            CSVPath = config.english_mono_path,
+            CSVPath = config.train_path,
             hparams = config,
             is_train=True,
             CSVPathMixup = config.hindi_mono_path,
