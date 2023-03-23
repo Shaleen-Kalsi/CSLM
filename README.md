@@ -1,4 +1,4 @@
-# Using dynamic data augmentation for Sentiment Analysis on Hinglish Code-Mixed text
+# Using dynamic data augmentation for Sentiment Analysis on Hinglish Code-Switched text
 
 ## Setup instructions
 
