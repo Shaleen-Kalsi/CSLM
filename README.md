@@ -1,10 +1,10 @@
-# Making multilingual language models robust to code-switched text
+# Using dynamic data augmentation for Sentiment Analysis on Hinglish Code-Mixed text
 
 ## Setup instructions
 
 > Note: Changing the directory structure of 'cslm' package might break poetry scripts.
 
-POETRY BEING A PAIN IN THE [ASS](https://github.com/python-poetry/poetry/issues/4231)
+[Poetry issues](https://github.com/python-poetry/poetry/issues/4231)
 
 Create separate environments for running static augmentation and normal training process. We ran into a lot of dependency conflicts.
 
