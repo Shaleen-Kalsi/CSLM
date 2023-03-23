@@ -6,29 +6,12 @@
 
 [Poetry issues](https://github.com/python-poetry/poetry/issues/4231)
 
-Create separate environments for running static augmentation and normal training process. We ran into a lot of dependency conflicts.
-
-Create an environment with the Python version 3.10.0
-```
-conda create -n cslm-env python==3.10.0
-conda activate cslm-env
-pip install -r requirements.txt
-```
-
-Use a separate environment for running static data agumentation
+Using poetry
 
 ```
-pip install -r flair-requirements.txt
+pip install poetry
+poetry install
 ```
-
-
-
-
-`pip install flair` [breaks](https://github.com/flairNLP/flair/issues/2969) for some python versions. So install it separately.
-```
-poetry run pip install git+https://github.com/flairNLP/flair  
-```
-
 
 ## Usage
 
