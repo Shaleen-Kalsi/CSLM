@@ -18,7 +18,7 @@ class CSLMDataset(Dataset):
 
     def __getitem__(self, idx):
         sentence = self.data.iloc[idx, 0]
-        mixup_data = self.data.sample(n= 1, random_state= 24)
+        mixup_data = self.data.sample(n= 1)
         sentence_mixup = mixup_data.iloc[0,0]
 
         #convert label to one-hot

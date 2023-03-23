@@ -84,11 +84,8 @@ class LightningModel(LightningModule):
         lam = np.random.beta(alpha, alpha)
 
         #construct the mixup label
-        #labels_x = torch.stack(labels_x)
-        #labels_mixup_x = torch.stack(labels_mixup_x)
         labels_x = lam*labels_x + (1-lam)*labels_mixup_x
 
-        #token_type_ids = batch['token_type_ids']
         # fwd
         apply_mixup = True
         logits = self(input_ids_x, attention_mask_x, labels_x, lam,  apply_mixup, input_ids_mixup_x, attention_mask_mixup_x, labels_mixup_x)
