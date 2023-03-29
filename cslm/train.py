@@ -42,6 +42,8 @@ def main():
     # Train
     logging.info("Setting up dataloaders..")
 
+    same_class_mixup = True if config.same_class_mixup == "True" else False
+
     if config.apply_mixup == "False":
         train_set = CSLMDataset(
             CSVPath = config.train_path,
@@ -53,8 +55,9 @@ def main():
             CSVPath = config.train_path,
             hparams = config,
             is_train=True,
-            CSVPathMixup = config.hindi_mono_path,
-            apply_mixup=True
+            CSVPathMixup = None, #set to the dataset of the other language if we want to do cross language mixup
+            apply_mixup=True,
+            same_class_mixup=same_class_mixup
         )
 
     
@@ -121,7 +124,7 @@ def main():
             #lr_monitor
         ],
         logger=logger,
-        resume_from_checkpoint=config.model_checkpt,
+        #resume_from_checkpoint=config.model_checkpt,
         accelerator=config.accelerator # If your machine has GPUs, it will use the GPU Accelerator for training
     )
 

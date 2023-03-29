@@ -61,11 +61,7 @@ class LightningModel(LightningModule):
         return logits
 
     def forward(self, input_ids_x, attention_mask_x, labels_x, lam, input_ids_mixup_x = None, attention_mask_mixup_x = None, labels_mixup_x = None):
-        #if apply_mixup is True:
         return self.mixup_forward(input_ids_x, input_ids_mixup_x, attention_mask_x, attention_mask_mixup_x, lam)
-        #else:
-            #logits = self.basic_forward(input_ids_x, attention_mask_x)
-            #return logits
 
 
     def training_step(self, batch, batch_idx):
@@ -85,14 +81,10 @@ class LightningModel(LightningModule):
             lam = np.random.beta(alpha, alpha)
 
             #construct the mixup label
-            #labels_x = torch.stack(labels_x)
-            #labels_mixup_x = torch.stack(labels_mixup_x)
             labels_x = lam*labels_x + (1-lam)*labels_mixup_x
             labels = labels_x
 
-            #token_type_ids = batch['token_type_ids']
-            # fwd
-            #apply_mixup = True
+            #forward
             logits = self(input_ids_x, attention_mask_x, labels_x, lam, input_ids_mixup_x, attention_mask_mixup_x, labels_mixup_x)
             
         else:

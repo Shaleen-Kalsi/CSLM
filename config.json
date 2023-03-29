@@ -1,29 +1,30 @@
 {
     "model_name": "CSLM",
-    "proj_dir": "/home/shale/dynamic-data-aug-mono/MLP",
+    "proj_dir": "\\C:\\Users\\shale\\OneDrive\\Documents\\CourseBooks\\Mlp\\cw4-final\\CSLM\\MLP",
     "run_name": "xlm-roberta-base-shaleen-dynamic-data-aug-cs-v3",
     "data": {
-        "dir": "/home/shale/dynamic-data-aug-mono/MLP/cslm/data",
-        "train_path": "$dir/sa_hinglish_train.csv",
-        "test_path": "$dir/sa_hinglish_test.csv",
-        "val_path": "$dir/sa_hinglish_val.csv",
-        "english_mono_path": "$dir/sa_hinglish_train.csv",
-        "hindi_mono_path": "$dir/sa_hinglish_train.csv",
-        "mixup_path": "$dir/mixup_hinglish-xlm-roberta-final.csv"
+        "dir": "C:/Users/shale/OneDrive/Documents/CourseBooks/Mlp/cw4-final/CSLM/cslm/data",
+        "train_path": "$dir\\sa_hinglish_train.csv",
+        "test_path": "$dir\\sa_hinglish_test.csv",
+        "val_path": "$dir\\sa_hinglish_val.csv",
+        "english_mono_path": "$dir\\sa_hinglish_train.csv",
+        "hindi_mono_path": "$dir\\sa_hinglish_train.csv",
+        "mixup_path": "$dir\\mixup_hinglish-xlm-roberta-final.csv"
     },
     "hparams": {
         "batch_size": "20",
         "epochs": "30",
         "lr": "1e-5",
         "weight_decay" : "0.0",
-        "upstream_model": "xlm-roberta-base",
+        "upstream_model": "cardiffnlp/twitter-xlm-roberta-base-sentiment",
         "freeze": "False",
-        "model_checkpt": "/home/shale/dynamic-data-aug-mono/MLP/checkpoints/xlm-roberta-base-shaleen-dynamic-data-aug-baseline-v1-epoch=3.ckpt",
+        "model_checkpt": "",
         "save_dir": "$proj_dir/checkpoints",
         "apply_mixup": "True",
-        "_comment": "Other models to choose from: 'bert-base-multilingual-cased', 'xlm-roberta-base', 'ai4bharat/indic-bert"
+        "same_class_mixup": "True",
+        "_comment": "Other models to choose from: 'bert-base-multilingual-cased', 'xlm-roberta-base', 'cardiffnlp/twitter-xlm-roberta-base-sentiment', 'ai4bharat/indic-bert"
     },
-    "accelerator": "gpu",
+    "accelerator": "cpu",
     "devices": 1,
     "n_workers": 4,
     "num_classes": 3,

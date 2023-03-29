@@ -31,9 +31,9 @@ class CSLMConfig():
         self.model_checkpt = config["hparams"]["model_checkpt"]
         self.save_dir = config["hparams"]["save_dir"].replace('$proj_dir', self.dir)
 
-        # data augmentation technique to use - dynamic/static
+        # data augmentation technique
         self.apply_mixup = config["hparams"]["apply_mixup"]
-
+        self.same_class_mixup = config["hparams"]["same_class_mixup"]
         self.run_name = config['run_name']
         
         # LR of optimizer
