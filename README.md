@@ -1,5 +1,7 @@
 # Using dynamic data augmentation for Sentiment Analysis on Hinglish Code-Switched text
 
+Refer to `report.pdf` for details about the project.
+
 ## Setup instructions
 
 > Note: Changing the directory structure of 'cslm' package might break poetry scripts.
